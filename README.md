@@ -36,9 +36,16 @@ skills/                # 11 slash commands (/name in Claude Code)
 
 scripts/
   eod-agents.sh          End-of-day batch runner (triage, papers, review, explore)
+  sync-config.sh         Auto-commit & push on changes (via launchd)
 
 tools/
-  claude_usage.py        Real-time spending tracker (tmux + SwiftBar)
+  claude_usage.py        Real-time spending tracker (core script)
+  swiftbar/
+    claude-usage.60s.py  SwiftBar menu bar plugin (calls claude_usage.py)
+
+tmux/
+  tmux.conf              tmux config (Ctrl+Space prefix, usage widget in status bar)
+  cheat.md               Cheatsheet popup (tmux, readline, Amethyst shortcuts)
 
 memory/
   MEMORY.md.template     Template for per-project memory files

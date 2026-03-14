@@ -36,10 +36,26 @@ backup_and_link "$REPO_DIR/agents"   "$CLAUDE_DIR/agents"
 backup_and_link "$REPO_DIR/skills"   "$CLAUDE_DIR/skills"
 backup_and_link "$REPO_DIR/scripts"  "$CLAUDE_DIR/scripts"
 
-# Optional: usage widget
-if [[ -d "$PROJECTS_DIR/claude-usage" ]]; then
-    backup_and_link "$REPO_DIR/tools/claude_usage.py" "$PROJECTS_DIR/claude-usage/claude_usage.py"
-    log "Linked usage widget"
+# Usage widget
+mkdir -p "$PROJECTS_DIR/claude-usage"
+backup_and_link "$REPO_DIR/tools/claude_usage.py" "$PROJECTS_DIR/claude-usage/claude_usage.py"
+log "Linked usage widget"
+
+# SwiftBar plugin
+SWIFTBAR_DIR="$HOME/.config/swiftbar"
+if [[ -d "$SWIFTBAR_DIR" ]] || command -v swiftbar &>/dev/null; then
+    mkdir -p "$SWIFTBAR_DIR"
+    backup_and_link "$REPO_DIR/tools/swiftbar/claude-usage.60s.py" "$SWIFTBAR_DIR/claude-usage.60s.py"
+    log "Linked SwiftBar plugin"
+fi
+
+# tmux config
+TMUX_DIR="$HOME/.config/tmux"
+if command -v tmux &>/dev/null; then
+    mkdir -p "$TMUX_DIR"
+    backup_and_link "$REPO_DIR/tmux/tmux.conf" "$TMUX_DIR/tmux.conf"
+    backup_and_link "$REPO_DIR/tmux/cheat.md"  "$TMUX_DIR/cheat.md"
+    log "Linked tmux config"
 fi
 
 # Optional: docs
