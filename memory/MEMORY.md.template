@@ -1,0 +1,18 @@
+# Global Memory
+
+> Cross-project preferences, usage patterns, and context.
+> Maintained by Claude across sessions. Last updated: 2026-02-11
+
+## User Preferences & Patterns
+
+<!-- How the user likes to work: communication style, tool preferences, recurring requests -->
+
+## Cross-Project Notes
+
+<!-- Insights, ideas, or references that span multiple projects -->
+
+## Session Log
+
+<!-- Append-only. Date + 1-2 lines. Keep last ~15 entries. -->
+
+- 2026-02-11: Memory system initialized. Split into global + per-project tiers.
