@@ -1,0 +1,9 @@
+# latexindent user settings
+# https://latexindentpl.readthedocs.io/en/latest/
+
+modifyLineBreaks:
+  textWrapOptions:
+    columns: 100          # hard-wrap prose at 100 chars
+    separator: ""         # no separator between wrapped lines
+  oneSentencePerLine:
+    manipulateSentences: 0  # don't force one-sentence-per-line (too aggressive)

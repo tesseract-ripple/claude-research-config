@@ -1,0 +1,187 @@
+{
+  // -------------------------------------------------------------------------
+  // VSCode user snippet for LaTeX — crypto/math research template
+  //
+  // INSTALLATION:
+  //   macOS/Linux: $HOME/.config/Code/User/snippets/latex.json
+  //   Windows:     %APPDATA%\Code\User\snippets\latex.json
+  //
+  // In VSCode: Cmd/Ctrl+Shift+P → "Snippets: Configure User Snippets" → latex
+  //
+  // USAGE: In any .tex file, type "cryptopaper" then Tab.
+  //        Tab stops are numbered: $1, $2, … $0 (final cursor position).
+  // -------------------------------------------------------------------------
+
+  "Crypto/Math Research Paper": {
+    "prefix": "cryptopaper",
+    "description": "Full preamble for a cryptography/mathematics research paper",
+    "body": [
+      "% ==========================================================================",
+      "% ${1:Paper Title}",
+      "% ==========================================================================",
+      "\\\\documentclass[11pt, a4paper]{article}",
+      "",
+      "\\\\usepackage{crypto-math}",
+      "% \\\\usepackage[draft]{crypto-math}",
+      "% \\\\usepackage[anonymous]{crypto-math}",
+      "",
+      "\\\\addbibresource{${2:refs}.bib}",
+      "",
+      "\\\\hypersetup{",
+      "  pdftitle  = {${1:Paper Title}},",
+      "  pdfauthor = {Tess Dore},",
+      "  pdfsubject= {Cryptography},",
+      "  pdfkeywords={${2:keyword1, keyword2}},",
+      "}",
+      "",
+      "\\\\title{\\\\textbf{${1:Paper Title}}}",
+      "\\\\author{Tess Dore\\\\\\\\\\\\small RippleX Research\\\\\\\\\\\\small \\\\texttt{tdore@ripple.com}}",
+      "\\\\date{\\\\today}",
+      "",
+      "\\\\begin{document}",
+      "\\\\maketitle",
+      "\\\\thispagestyle{plain}",
+      "",
+      "\\\\begin{abstract}",
+      "  ${7:Abstract text.}",
+      "\\\\end{abstract}",
+      "",
+      "\\\\tableofcontents",
+      "\\\\newpage",
+      "",
+      "\\\\section{Introduction}",
+      "\\\\label{sec:intro}",
+      "${0}",
+      "",
+      "\\\\section{Preliminaries}",
+      "\\\\label{sec:prelim}",
+      "",
+      "\\\\section{Main Results}",
+      "\\\\label{sec:results}",
+      "",
+      "\\\\section{Conclusion}",
+      "\\\\label{sec:conclusion}",
+      "",
+      "\\\\printbibliography",
+      "",
+      "\\\\end{document}"
+    ]
+  },
+
+  "Theorem environment": {
+    "prefix": "thm",
+    "description": "Theorem + label",
+    "body": [
+      "\\\\begin{theorem}[${1:Name}]",
+      "  \\\\label{thm:${2:label}}",
+      "  ${0}",
+      "\\\\end{theorem}"
+    ]
+  },
+
+  "Lemma environment": {
+    "prefix": "lem",
+    "description": "Lemma + label",
+    "body": [
+      "\\\\begin{lemma}",
+      "  \\\\label{lem:${1:label}}",
+      "  ${0}",
+      "\\\\end{lemma}"
+    ]
+  },
+
+  "Definition environment": {
+    "prefix": "defn",
+    "description": "Definition + label",
+    "body": [
+      "\\\\begin{definition}[${1:Name}]",
+      "  \\\\label{def:${2:label}}",
+      "  ${0}",
+      "\\\\end{definition}"
+    ]
+  },
+
+  "Proof environment": {
+    "prefix": "prf",
+    "description": "Proof block",
+    "body": [
+      "\\\\begin{proof}",
+      "  ${0}",
+      "\\\\end{proof}"
+    ]
+  },
+
+  "Restatable theorem": {
+    "prefix": "rethm",
+    "description": "Restatable theorem (thmtools/thm-restate)",
+    "body": [
+      "\\\\begin{restatable}[${1:Name}]{theorem}{${2:thmMacroName}}",
+      "  \\\\label{thm:${3:label}}",
+      "  ${0}",
+      "\\\\end{restatable}"
+    ]
+  },
+
+  "Algorithm": {
+    "prefix": "alg",
+    "description": "Algorithm (algorithmicx)",
+    "body": [
+      "\\\\begin{algorithm}[H]",
+      "  \\\\caption{${1:Caption}}",
+      "  \\\\label{alg:${2:label}}",
+      "  \\\\begin{algorithmic}[1]",
+      "    \\\\Require{${3:Input}}",
+      "    \\\\Ensure{${4:Output}}",
+      "    ${0}",
+      "  \\\\end{algorithmic}",
+      "\\\\end{algorithm}"
+    ]
+  },
+
+  "Aligned equation": {
+    "prefix": "ali",
+    "description": "align environment",
+    "body": [
+      "\\\\begin{align}",
+      "  ${0} &= \\\\\\\\",
+      "\\\\end{align}"
+    ]
+  },
+
+  "Advantage expression": {
+    "prefix": "adv",
+    "description": "Advantage macro \\Adv{game}{scheme}",
+    "body": "\\\\Adv{${1:game}}{${2:scheme}}(\\\\A) \\\\le ${0}"
+  },
+
+  "LWE assumption": {
+    "prefix": "lweassum",
+    "description": "Standard LWE assumption statement",
+    "body": "the $\\\\LWE_{${1:n},${2:q},${3:\\\\chi}}$ problem is hard"
+  },
+
+  "Section with label": {
+    "prefix": "sec",
+    "description": "Section + label",
+    "body": [
+      "\\\\section{${1:Title}}",
+      "\\\\label{sec:${2:label}}",
+      "${0}"
+    ]
+  },
+
+  "Tikz figure": {
+    "prefix": "tikzfig",
+    "description": "TikZ figure skeleton",
+    "body": [
+      "\\\\begin{figure}[htbp]",
+      "  \\\\centering",
+      "  \\\\begin{tikzpicture}",
+      "    ${0}",
+      "  \\\\end{tikzpicture}",
+      "  \\\\caption{${1:Caption.}}",
+      "  \\\\label{fig:${2:label}}",
+      "\\\\end{figure}"
+    ]
+  }
+}

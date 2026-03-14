@@ -1,0 +1,214 @@
+% =============================================================================
+% template.tex  —  Cryptography / Mathematics Research Paper
+%
+% COMPILATION (recommended):
+%   pdflatex template  &&  biber template  &&  pdflatex template  &&  pdflatex template
+% Or with latexmk:
+%   latexmk -pdf -pvc template
+%
+% Install crypto-math.sty once to your local TEXMF tree:
+%   mkdir -p ~/texmf/tex/latex/local
+%   cp crypto-math.sty ~/texmf/tex/latex/local/
+%   mktexlsr                      # or: texhash
+% =============================================================================
+
+\documentclass[11pt, a4paper]{article}
+
+% --------------------------------------------------------------------------- %
+%  Load the master style sheet.
+%  Pass options:
+%    draft     -- disables microtype expansion, marks hyperref draft
+%    anonymous -- suppresses author info (double-blind submissions)
+% --------------------------------------------------------------------------- %
+\usepackage{crypto-math}
+% \usepackage[draft]{crypto-math}
+% \usepackage[anonymous]{crypto-math}
+
+% --------------------------------------------------------------------------- %
+%  Bibliography file(s) — uncomment and adjust path.
+% --------------------------------------------------------------------------- %
+% \addbibresource{refs.bib}
+
+% --------------------------------------------------------------------------- %
+%  PDF metadata  (hyperref)
+% --------------------------------------------------------------------------- %
+\hypersetup{
+  pdftitle  = {Paper Title},
+  pdfauthor = {Tess Dore},
+  pdfsubject= {Cryptography},
+  pdfkeywords={keyword1, keyword2, keyword3},
+}
+
+% ============================================================================
+%  TITLE BLOCK
+% ============================================================================
+\title{%
+  \textbf{Paper Title}\\[0.5ex]
+  \large Subtitle (if any)
+}
+
+\author{%
+  Tess Dore\\
+  \small RippleX Research\\
+  \small \texttt{tdore@ripple.com}
+}
+
+\date{\today}   % or \date{} to suppress
+
+% ============================================================================
+%  DOCUMENT
+% ============================================================================
+\begin{document}
+
+\maketitle
+\thispagestyle{plain}   % page number only on title page
+
+% --------------------------------------------------------------------------- %
+\begin{abstract}
+  Write a concise abstract here.
+  State the problem, your main result, and the key technique.
+\end{abstract}
+
+\paragraph{Keywords.} Keyword one; keyword two; keyword three.
+
+% --------------------------------------------------------------------------- %
+\tableofcontents
+\newpage
+
+% ============================================================================
+%  §1  INTRODUCTION
+% ============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+A forward reference works: see \cref{sec:prelim} for background.
+Cite a paper like this~\cite{example2024}.
+
+% ============================================================================
+%  §2  PRELIMINARIES
+% ============================================================================
+\section{Preliminaries}
+\label{sec:prelim}
+
+\subsection{Notation}
+
+Let $\secpar \in \N$ be the security parameter.
+We write $x \getsu S$ for $x$ sampled uniformly from a set $S$,
+and $x \getsu \D$ for $x$ sampled from distribution $\D$.
+All algorithms are implicitly given $\secp$ as input.
+$\negl(\secpar)$ denotes a negligible function.
+We use $\bits^n$ for the set $\{0,1\}^n$.
+
+\subsection{Definitions}
+
+\begin{definition}[Hard-core predicate]
+  \label{def:hardcore}
+  A function $b \colon \bits^* \to \bits$ is a \emph{hard-core predicate} for a
+  one-way function $f$ if \ldots
+\end{definition}
+
+\begin{definition}[$(\varepsilon, \delta)$-Differential Privacy]
+  A randomised algorithm $\mathcal{M}$ is $(\varepsilon,\delta)$-differentially
+  private if for all neighbouring datasets $D, D'$ and all $S \subseteq \mathrm{Range}(\mathcal{M})$:
+  \[
+    \Pr{\mathcal{M}(D) \in S} \;\le\; e^{\varepsilon}\,\Pr{\mathcal{M}(D') \in S} + \delta.
+  \]
+\end{definition}
+
+% ============================================================================
+%  §3  MAIN RESULTS
+% ============================================================================
+\section{Main Results}
+\label{sec:results}
+
+\begin{theorem}[Main theorem]
+  \label{thm:main}
+  Assuming the $\LWE_{n,q,\chi}$ problem is hard,
+  the scheme $\Pi$ in \cref{con:main} is $\mathrm{IND\text{-}CPA}$-secure.
+\end{theorem}
+
+\begin{construction}
+  \label{con:main}
+  The scheme $\Pi = (\KeyGen, \Enc, \Dec)$ is defined as follows.
+  \begin{description}[leftmargin=2em]
+    \item[$\KeyGen(1^\secpar)$:] Sample $\mathbf{A} \getsu \Zq^{m \times n}$, \ldots
+    \item[$\Enc(\pk, \mu)$:] \ldots
+    \item[$\Dec(\sk, \ct)$:] \ldots
+  \end{description}
+\end{construction}
+
+\begin{proof}[Proof of \cref{thm:main}]
+  We reduce to $\LWE$.
+  Let $\A$ be a $\PPT$ adversary against $\Pi$.
+  We construct a reduction $\B$ against $\LWE$ \ldots
+  \[
+    \Adv{\mathrm{IND\text{-}CPA}}{\Pi}(\A) \;\le\;
+    2 \cdot \Adv{\LWE_{n,q,\chi}}{\B}(\A) + \negl(\secpar).
+  \]
+\end{proof}
+
+\begin{lemma}
+  \label{lem:key}
+  For all $\mathbf{s} \in \Zq^n$ and $\chi$-distributed $e$,
+  \[
+    \norm{\mathbf{A}^\top\mathbf{s} + \mathbf{e} \bmod q}_\infty
+    \;\le\; q/4
+  \]
+  with probability $1 - \negl(\secpar)$.
+\end{lemma}
+
+% ============================================================================
+%  §4  ALGORITHMS
+% ============================================================================
+\section{Algorithm Example}
+\label{sec:alg}
+
+\begin{algorithm}[H]
+  \caption{Example algorithm}
+  \label{alg:example}
+  \begin{algorithmic}[1]
+    \Require{Public matrix $\mathbf{A} \in \Zq^{m \times n}$, query $\mathbf{b} \in \Zq^m$}
+    \Ensure{Bit $b \in \bits$}
+    \State $\mathbf{c} \gets \mathbf{A}\mathbf{A}^\top\mathbf{b} \bmod q$
+    \For{$i \gets 1$ to $m$}
+      \If{$c_i > q/2$}
+        \State $c_i \gets c_i - q$
+      \EndIf
+    \EndFor
+    \State \Return $\lfloor 2\norm{\mathbf{c}} / q \rceil \bmod 2$
+  \end{algorithmic}
+\end{algorithm}
+
+% ============================================================================
+%  §5  CONCLUSION
+% ============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+\ldots
+
+% ============================================================================
+%  BIBLIOGRAPHY
+% ============================================================================
+% With biblatex:
+% \printbibliography
+
+% With classic BibTeX (use instead of biblatex block in sty):
+% \bibliographystyle{alpha}
+% \bibliography{refs}
+
+% ============================================================================
+%  APPENDIX
+% ============================================================================
+\begin{appendices}
+
+\section{Proof of \texorpdfstring{\cref{lem:key}}{Lemma~\ref{lem:key}}}
+\label{app:proof-lem-key}
+
+\begin{proof}
+  \ldots
+\end{proof}
+
+\end{appendices}
+
+\end{document}

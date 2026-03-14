@@ -1,0 +1,455 @@
+% =============================================================================
+% crypto-math.sty
+% A comprehensive LaTeX style sheet for mathematics and cryptography research.
+%
+% Usage: \usepackage{crypto-math}  (after \documentclass)
+%
+% Package load order respects: fonts -> math -> floats -> refs -> hyperref
+%   -> cleveref.  Load no packages after cleveref.
+% =============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{crypto-math}[2026/02/24 v1.0 Math and Cryptography Research]
+
+% --------------------------------------------------------------------------- %
+%  PACKAGE OPTIONS
+%    draft     -- pass 'draft' to hyperref and microtype
+%    anonymous -- suppress author blocks (for double-blind)
+%    appendix  -- load appendix package with titletoc
+% --------------------------------------------------------------------------- %
+\newif\if@cmbdraft\@cmbdraftfalse
+\newif\if@cmbanon\@cmbanonfalse
+\DeclareOption{draft}{\@cmbdrafttrue}
+\DeclareOption{anonymous}{\@cmbanontrue}
+\ProcessOptions\relax
+
+% ============================================================================
+%  1. ENCODING & LANGUAGE
+% ============================================================================
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[english]{babel}
+
+% ============================================================================
+%  2. FONTS & TYPOGRAPHY
+% ============================================================================
+\RequirePackage{lmodern}          % Latin Modern: clean CM extension, proper PDF glyphs
+
+\if@cmbdraft
+  \RequirePackage[draft,babel=true,final]{microtype}
+\else
+  \RequirePackage[protrusion=true,expansion=true,tracking=true,
+                  kerning=true,spacing=true,babel=true,final]{microtype}
+\fi
+
+% ============================================================================
+%  3. PAGE GEOMETRY  (sensible defaults; override in the document)
+% ============================================================================
+\RequirePackage[
+  a4paper,
+  top=2.5cm, bottom=2.5cm, left=2.8cm, right=2.8cm,
+  headheight=14pt
+]{geometry}
+
+% ============================================================================
+%  4. CORE MATHEMATICS
+% ============================================================================
+\RequirePackage{amsmath}          % align, gather, split, cases, …
+\RequirePackage{amssymb}          % \mathbb, extra symbols
+\RequirePackage{amsfonts}         % AMS font families
+\RequirePackage{amsthm}           % \newtheorem, proof environment
+\RequirePackage{mathtools}        % \coloneqq, \mathclap, paired delimiters, fixes
+
+% Extended symbol sets
+\RequirePackage{stmaryrd}         % \llbracket \rrbracket, \lightning, \varotimes, …
+% stmaryrd has no bold font variant; substitute the medium weight to suppress warning.
+\SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
+\RequirePackage{mathrsfs}         % \mathscr{} — Euler script letters
+\RequirePackage[bb=boondox]{mathalfa} % \mathbb{1} indicator; also gives nicer 0,1,k
+\RequirePackage{bm}               % \bm{} — bold math (vectors, matrices)
+\RequirePackage{isomath}          % ISO-standard: \vectorsym, \matrixsym (optional)
+
+% Complexity classes (\NP, \P, \coNP, \BPP, \PSPACE, \EXP, …)
+\RequirePackage{complexity}
+
+% ============================================================================
+%  5. THEOREM ENVIRONMENTS
+%    All share a single counter anchored to section number.
+% ============================================================================
+\RequirePackage{thmtools}         % \declaretheorem, \listoftheorems
+\RequirePackage{thm-restate}      % \begin{restatable}{theorem}{thmname} … \end{restatable}
+
+\declaretheoremstyle[
+  spaceabove=6pt, spacebelow=6pt,
+  headfont=\normalfont\bfseries,
+  notefont=\normalfont\bfseries,  notebraces={(}{)},
+  bodyfont=\itshape,
+  headpunct={.}
+]{thmstyle}
+
+\declaretheoremstyle[
+  spaceabove=6pt, spacebelow=6pt,
+  headfont=\normalfont\bfseries,
+  notefont=\normalfont\bfseries,  notebraces={(}{)},
+  bodyfont=\normalfont,
+  headpunct={.}
+]{defstyle}
+
+\declaretheoremstyle[
+  spaceabove=4pt, spacebelow=4pt,
+  headfont=\normalfont\itshape,
+  notefont=\normalfont\itshape,   notebraces={(}{)},
+  bodyfont=\normalfont,
+  headpunct={.}
+]{remstyle}
+
+% -- Numbered environments (share counter within section) ------------------
+\declaretheorem[style=thmstyle, numberwithin=section, name=Theorem]{theorem}
+\declaretheorem[style=thmstyle, sibling=theorem,       name=Lemma]{lemma}
+\declaretheorem[style=thmstyle, sibling=theorem,       name=Proposition]{proposition}
+\declaretheorem[style=thmstyle, sibling=theorem,       name=Corollary]{corollary}
+\declaretheorem[style=thmstyle, sibling=theorem,       name=Claim]{claim}
+\declaretheorem[style=thmstyle, sibling=theorem,       name=Conjecture]{conjecture}
+\declaretheorem[style=defstyle, sibling=theorem,       name=Definition]{definition}
+\declaretheorem[style=defstyle, sibling=theorem,       name=Example]{example}
+\declaretheorem[style=defstyle, sibling=theorem,       name=Construction]{construction}
+\declaretheorem[style=defstyle, sibling=theorem,       name=Protocol]{protocol}
+\declaretheorem[style=remstyle, sibling=theorem,       name=Remark]{remark}
+\declaretheorem[style=remstyle, sibling=theorem,       name=Note]{note}
+
+% -- Unnumbered versions ----------------------------------------------------
+\declaretheorem[style=thmstyle, numbered=no, name=Theorem]{theorem*}
+\declaretheorem[style=thmstyle, numbered=no, name=Lemma]{lemma*}
+\declaretheorem[style=thmstyle, numbered=no, name=Corollary]{corollary*}
+\declaretheorem[style=defstyle, numbered=no, name=Definition]{definition*}
+\declaretheorem[style=remstyle, numbered=no, name=Remark]{remark*}
+
+% -- Proof: override amsthm default to use a proper QED box ----------------
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+% ============================================================================
+%  6. ALGORITHMS & PSEUDOCODE
+% ============================================================================
+% Option A: algorithmicx + algpseudocode (clean, widely used)
+\RequirePackage{algorithm}
+\RequirePackage{algpseudocode}    % loads algorithmicx automatically
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+% Option B (IACR-style crypto protocols): cryptocode
+%   Comment out the block above and uncomment below if you prefer cryptocode.
+%\RequirePackage[
+%  lambda, advantage, operators, sets, adversary,
+%  landau, probability, notions, logic, ff, mm, primitives,
+%  events, complexity, oracles, asymptotics, keys
+%]{cryptocode}
+
+% ============================================================================
+%  7. FIGURES, TABLES & FLOATS
+% ============================================================================
+\RequirePackage{graphicx}         % \includegraphics
+\RequirePackage{xcolor}           % \textcolor, \definecolor
+\RequirePackage{booktabs}         % \toprule \midrule \bottomrule
+\RequirePackage{array}            % extended column specs in tabular
+\RequirePackage{multirow}         % \multirow
+\RequirePackage{subcaption}       % subfigures / subtables
+\RequirePackage{float}            % [H] placement
+\RequirePackage[margin=10pt,font=small,labelfont=bf]{caption}
+
+% TikZ (optional; comment out if not needed to speed up compilation)
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{
+  arrows.meta, calc, positioning, fit,
+  decorations.pathreplacing, matrix, shapes.geometric
+}
+
+% ============================================================================
+%  8. LISTS & LAYOUT UTILITIES
+% ============================================================================
+\RequirePackage{enumitem}         % fine-grained list customisation
+\setlist{noitemsep, topsep=4pt}   % tighten default list spacing
+\RequirePackage{parskip}          % paragraph spacing instead of indent
+  \setlength{\parindent}{0pt}
+  \setlength{\parskip}{6pt plus 2pt minus 1pt}
+\RequirePackage{setspace}         % \onehalfspacing, \doublespacing
+\RequirePackage{multicol}         % \begin{multicols}{2}
+\RequirePackage{pdflscape}        % landscape pages in PDF
+
+% ============================================================================
+%  9. BIBLIOGRAPHY
+%    Using biblatex + biber (recommended).
+%    Switch to natbib below if your venue requires classic BibTeX.
+% ============================================================================
+\RequirePackage[
+  backend=biber,
+  style=alphabetic,               % [Gol04], [ABC+20] — standard in crypto/theory
+  sortcites=true,
+  url=false, doi=true, isbn=false,
+  maxbibnames=10, maxcitenames=3,
+  giveninits=true
+]{biblatex}
+% \addbibresource{refs.bib}       % <-- add in your document, not here
+
+% natbib alternative (uncomment + comment out biblatex block above):
+% \RequirePackage[numbers,sort&compress]{natbib}
+
+% ============================================================================
+%  10. HYPERLINKS & CROSS-REFERENCES
+%     hyperref MUST come before cleveref.
+%     Keep hyperref near the END of the preamble.
+% ============================================================================
+% \PassOptionsToPackage must be called BEFORE \RequirePackage;
+% LaTeX option lists are not expanded, so \if… inside [] is not valid.
+\if@cmbdraft
+  \PassOptionsToPackage{draft}{hyperref}
+\else
+  \PassOptionsToPackage{final}{hyperref}
+\fi
+\RequirePackage[
+  colorlinks = true,
+  linkcolor  = blue!70!black,
+  citecolor  = green!50!black,
+  urlcolor   = cyan!70!black,
+  filecolor  = magenta,
+  pdfdisplaydoctitle = true,
+  hypertexnames = false,          % avoids issues with thmtools + hyperref
+  bookmarksnumbered = true,
+  bookmarksopen     = true,
+  breaklinks  = true
+]{hyperref}
+
+% -- cleveref: must be LAST ---------------------------------------------------
+\RequirePackage[capitalize, noabbrev]{cleveref}
+% Custom names for theorem-like environments:
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{claim}{Claim}{Claims}
+\crefname{conjecture}{Conjecture}{Conjectures}
+\crefname{definition}{Definition}{Definitions}
+\crefname{example}{Example}{Examples}
+\crefname{construction}{Construction}{Constructions}
+\crefname{protocol}{Protocol}{Protocols}
+\crefname{remark}{Remark}{Remarks}
+\crefname{algorithm}{Algorithm}{Algorithms}
+\crefname{figure}{Figure}{Figures}
+\crefname{table}{Table}{Tables}
+\crefname{section}{Section}{Sections}
+\crefname{appendix}{Appendix}{Appendices}
+\crefname{equation}{}{}           % cleveref renders (1), (2), …
+
+% ============================================================================
+%  11. EDITING & REVIEWING AIDS
+% ============================================================================
+% todonotes requires marginparwidth >= 2cm; set before loading the package.
+\setlength{\marginparwidth}{2cm}
+\RequirePackage{todonotes}        % \todo{}, \missingfigure{}
+\RequirePackage{soul}             % \hl{}, \st{} (strikethrough)
+\RequirePackage{comment}          % \begin{comment} … \end{comment}
+\if@cmbanon
+  % In anonymous mode, suppress todo notes silently
+  \renewcommand{\todo}[2][]{}
+  \renewcommand{\missingfigure}[2][]{}
+\fi
+
+% ============================================================================
+%  12. GENERAL MATHEMATICS MACROS
+% ============================================================================
+
+% -- Sets --------------------------------------------------------------------
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\F}{\mathbb{F}}       % generic finite field
+\newcommand{\GF}[1]{\mathbb{F}_{#1}}  % \GF{q}, \GF{2^n}
+\newcommand{\Zmod}[1]{\Z/#1\Z}    % Z/nZ
+\newcommand{\Zstar}[1]{\Z_{#1}^*} % Z_n^*
+
+% -- Common notations --------------------------------------------------------
+\renewcommand{\emptyset}{\varnothing}
+\newcommand{\setminus}{\smallsetminus}
+\DeclareMathOperator{\lcm}{lcm}
+\DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\Span}{span}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\Ker}{ker}
+\DeclareMathOperator{\Tr}{Tr}      % trace
+\DeclareMathOperator{\Nm}{N}       % norm (algebraic)
+\DeclareMathOperator{\Gal}{Gal}
+\DeclareMathOperator{\End}{End}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\polylog}{polylog}
+\newcommand{\poly}{\mathrm{poly}}  % poly(n)  — intentionally not \DeclareMathOperator
+\newcommand{\eps}{\varepsilon}
+\renewcommand{\phi}{\varphi}       % prefer \varphi globally
+
+% -- Paired delimiters (auto-scaling via \DeclarePairedDelimiter) -----------
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\angbr}{\langle}{\rangle}  % \angbr{x,y} inner product
+\DeclarePairedDelimiter{\sembrack}{\llbracket}{\rrbracket} % semantic brackets
+
+% Usage: \abs{x}, \abs*{x} (starred = \left…\right)
+
+% -- Arrows & relations -------------------------------------------------------
+\newcommand{\defeq}{\coloneqq}     % :=   (mathtools)
+\newcommand{\eqdef}{\eqqcolon}     % =:
+\newcommand{\into}{\hookrightarrow}
+\newcommand{\onto}{\twoheadrightarrow}
+\newcommand{\isoarrow}{\xrightarrow{\sim}}
+\newcommand{\concat}{\mathbin{\|}}  % string concatenation: x \concat y
+
+% -- Landau / asymptotic notation --------------------------------------------
+\newcommand{\bigO}[1]{O\!\left(#1\right)}
+\newcommand{\bigOt}[1]{\tilde{O}\!\left(#1\right)}
+\newcommand{\bigTheta}[1]{\Theta\!\left(#1\right)}
+\newcommand{\bigOmega}[1]{\Omega\!\left(#1\right)}
+
+% ============================================================================
+%  13. PROBABILITY & INFORMATION THEORY MACROS
+% ============================================================================
+\DeclareMathOperator*{\Expect}{\mathbb{E}}     % \Expect[X], \Expect_{x}[f(x)]
+\newcommand{\E}[2][]{\Expect_{#1}\!\left[#2\right]}
+\renewcommand{\Pr}[2][]{\mathbf{Pr}_{#1}\!\left[#2\right]}  % \Pr[A], \Pr[x\gets D]{f(x)=1}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\entropy}[1]{\mathrm{H}\!\left(#1\right)}        % Shannon entropy
+\newcommand{\renyi}[2]{\mathrm{H}_{#1}\!\left(#2\right)}     % \renyi{\alpha}{X}
+\newcommand{\kldiv}[2]{D_{\mathrm{KL}}\!\left(#1 \,\|\, #2\right)}
+\newcommand{\sdist}[2]{\Delta\!\left(#1,\,#2\right)}         % statistical distance
+
+% Sampling notation
+\newcommand{\getsu}{\xleftarrow{\$}}           % uniform sampling: x \getsu S
+\newcommand{\getsd}{\xleftarrow{\$}}           % alias
+\newcommand{\getsa}{\xleftarrow{}}             % deterministic assignment
+
+% ============================================================================
+%  14. CRYPTOGRAPHY MACROS
+% ============================================================================
+
+% -- Security parameter ------------------------------------------------------
+\newcommand{\secpar}{\lambda}
+\newcommand{\secp}{1^{\secpar}}    % unary security parameter
+\newcommand{\negl}{\mathrm{negl}}  % negligible function
+\newcommand{\PPT}{\mathsf{PPT}}    % probabilistic polynomial time
+
+% -- Advantage & security games ----------------------------------------------
+\newcommand{\Adv}[2]{\mathbf{Adv}^{#1}_{#2}}        % \Adv{XXX}{\A}
+\newcommand{\Exp}[2]{\mathbf{Exp}^{#1}_{#2}}         % \Exp{game}{scheme}
+\newcommand{\Win}{\mathbf{Win}}
+\newcommand{\Succ}{\mathbf{Succ}}
+\newcommand{\Bad}{\mathbf{Bad}}
+
+% -- Adversaries & oracles ---------------------------------------------------
+\newcommand{\A}{\mathcal{A}}       % adversary
+\newcommand{\B}{\mathcal{B}}       % reduction / second adversary
+% \Sim (\mathcal{S}) is defined below in the "Scheme algorithms" block.
+\newcommand{\D}{\mathcal{D}}       % distinguisher / distribution
+\newcommand{\RO}{\mathcal{H}}      % random oracle
+\newcommand{\Ora}[1]{\mathcal{O}_{#1}}  % oracle
+
+% -- Computational hardness --------------------------------------------------
+\newcommand{\DLog}{\mathsf{DLog}}
+\newcommand{\CDH}{\mathsf{CDH}}
+\newcommand{\DDH}{\mathsf{DDH}}
+\newcommand{\RSA}{\mathsf{RSA}}
+\newcommand{\LWE}{\mathsf{LWE}}
+\newcommand{\RLWE}{\mathsf{RLWE}}
+\newcommand{\SIS}{\mathsf{SIS}}
+\newcommand{\RSIS}{\mathsf{RSIS}}
+\newcommand{\SVP}{\mathsf{SVP}}
+\newcommand{\CVP}{\mathsf{CVP}}
+\newcommand{\ISIS}{\mathsf{ISIS}}
+
+% -- Scheme algorithms (generic) ---------------------------------------------
+\newcommand{\Gen}{\mathsf{Gen}}
+\newcommand{\Setup}{\mathsf{Setup}}
+\newcommand{\KeyGen}{\mathsf{KeyGen}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\Sign}{\mathsf{Sign}}
+\newcommand{\Verify}{\mathsf{Verify}}
+\newcommand{\Hash}{\mathsf{H}}
+\newcommand{\Eval}{\mathsf{Eval}}
+\newcommand{\Commit}{\mathsf{Commit}}
+\newcommand{\Open}{\mathsf{Open}}
+\newcommand{\Prove}{\mathsf{Prove}}
+\newcommand{\Extract}{\mathsf{Extract}}
+\newcommand{\Sim}{\mathcal{S}}     % simulator
+
+% -- Keys & parameters -------------------------------------------------------
+\newcommand{\pk}{\mathsf{pk}}
+\newcommand{\sk}{\mathsf{sk}}
+\newcommand{\pp}{\mathsf{pp}}      % public parameters
+\newcommand{\msk}{\mathsf{msk}}    % master secret key
+\newcommand{\mpk}{\mathsf{mpk}}    % master public key
+\newcommand{\vk}{\mathsf{vk}}      % verification key
+\newcommand{\ek}{\mathsf{ek}}      % evaluation/encryption key
+\newcommand{\td}{\mathsf{td}}      % trapdoor
+\newcommand{\crs}{\mathsf{crs}}    % common reference string
+
+% -- Ciphertexts, messages, randomness ----------------------------------------
+\newcommand{\ct}{\mathsf{ct}}
+\newcommand{\msg}{m}
+\newcommand{\ptxt}{\mu}            % plaintext symbol
+\newcommand{\rand}{r}              % randomness
+\newcommand{\bits}{\{0,1\}}
+\newcommand{\bitstr}[1]{\{0,1\}^{#1}}  % \bitstr{n} = {0,1}^n
+
+% -- Groups & lattices --------------------------------------------------------
+\newcommand{\GG}{\mathbb{G}}       % generic group
+\newcommand{\GT}{\mathbb{G}_T}     % target group (pairings)
+\newcommand{\Zq}{\mathbb{Z}_q}
+\newcommand{\Zp}{\mathbb{Z}_p}
+\newcommand{\LL}{\mathcal{L}}      % lattice
+\newcommand{\lat}{\Lambda}         % lattice (alt)
+\newcommand{\ip}[1]{\left\langle #1 \right\rangle}   % inner product
+% \Span already declared in §12; no second \DeclareMathOperator here.
+\newcommand{\smoothp}{\tilde{\lambda}}  % smoothing parameter
+
+% -- Notation shortcuts -------------------------------------------------------
+\newcommand{\zo}{\{0,1\}}
+\newcommand{\zos}[1]{\{0,1\}^{#1}}
+\newcommand{\getsr}{\xleftarrow{R}}   % random coins
+
+% ============================================================================
+%  15. HEADER / FOOTER (plain style; comment out if using a journal class)
+% ============================================================================
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\small\nouppercase{\leftmark}}
+\fancyhead[R]{\small\thepage}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyfoot[C]{\small\thepage}
+}
+
+% ============================================================================
+%  16. MISCELLANEOUS
+% ============================================================================
+\RequirePackage{xspace}            % smart trailing space after macros
+\RequirePackage{xparse}            % \NewDocumentCommand — richer macro definitions
+\RequirePackage{etoolbox}          % \patchcmd, \AtBeginDocument, etc.
+\RequirePackage{url}               % \url{} (also provided by hyperref)
+\RequirePackage[normalem]{ulem}    % \sout strikethrough (normalem: don't redefine \em)
+
+% Appendix with section-number reset
+\RequirePackage[title,titletoc]{appendix}
+
+% AMS short-hand: \eqref is already defined by amsmath;
+% \labelcref by cleveref.  Nothing extra needed.
+
+\endinput
+% =============================================================================
+% END OF crypto-math.sty
+% =============================================================================

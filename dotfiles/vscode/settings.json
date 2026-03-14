@@ -1,0 +1,56 @@
+{
+    "workbench.colorTheme": "Noctis Bordo",
+    "git.autofetch": true,
+    "terminal.integrated.fontFamily": "Mononoki Nerd Font",
+    "editor.fontFamily": "JetBrainsMono Nerd Font, Menlo, Monaco, 'Courier New', monospace",
+    "terminal.integrated.defaultProfile.osx": "fish",
+    "claudeCode.preferredLocation": "sidebar",
+    "claudeCode.useTerminal": true,
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "latex-workshop.latex.tools": [
+        {
+            "name": "pdflatex",
+            "command": "pdflatex",
+            "args": ["-synctex=1", "-interaction=nonstopmode", "-file-line-error", "%DOC%"]
+        },
+        {
+            "name": "biber",
+            "command": "biber",
+            "args": ["%DOCFILE%"]
+        },
+        {
+            "name": "latexmk",
+            "command": "latexmk",
+            "args": ["-pdf", "-synctex=1", "-interaction=nonstopmode", "-file-line-error", "%DOC%"]
+        }
+    ],
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "pdflatex × 2 + biber",
+            "tools": ["pdflatex", "biber", "pdflatex", "pdflatex"]
+        },
+        {
+            "name": "latexmk",
+            "tools": ["latexmk"]
+        }
+    ],
+    "latex-workshop.latex.recipe.default": "pdflatex × 2 + biber",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.latexindent.path": "latexindent",
+    "latex-workshop.latexindent.args": [
+        "-c", "%DIR%/",
+        "%TMPFILE%",
+        "-l", "/Users/tdore/.config/latexindent.yaml",
+        "-m"
+    ],
+    "latex-workshop.formatting.latex": "latexindent",
+    "latex-workshop.chktex.path": "/Library/TeX/texbin/chktex",
+    "[latex]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "james-yu.latex-workshop",
+        "editor.wordWrap": "off",
+        "editor.rulers": [100]
+    }
+}
