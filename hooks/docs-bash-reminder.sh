@@ -4,7 +4,6 @@
 cmd=$(jq -r '.tool_input.command // empty')
 
 # Only trigger on commands that create, copy, move, or clone into monitored paths
-# Check for structural commands first
 case "$cmd" in
   *mkdir*|*cp\ *|*mv\ *|*git\ clone*|*git\ init*|*touch\ *)
     ;;
@@ -19,24 +18,27 @@ if ! echo "$cmd" | grep -qE "$monitored"; then
   exit 0  # structural command but not in a monitored path
 fi
 
-sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
-audit_done="$HOME/.claude/hooks/.docs-audit-done"
-
-# If the audit already ran this session, stay silent — no more reminders or sentinel writes
-[ -f "$audit_done" ] && exit 0
-
-# Commands targeting docs/ itself are the audit — don't re-trigger the sentinel
+# Commands targeting docs/ itself are the audit output — no reminder needed
 case "$cmd" in
   *claude-projects/docs/*) exit 0 ;;
 esac
 
-# First qualifying command: show reminder and set sentinel for Stop audit
-# Subsequent commands: silently ensure sentinel exists, skip the reminder
-if [ -f "$sentinel" ]; then
-  exit 0
+sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
+audit_done="$HOME/.claude/hooks/.docs-audit-done"
+
+# Always set the sentinel (gates the Stop audit), UNLESS audit already ran —
+# in that case, still show the reminder but don't re-arm the Stop hook
+if [ ! -f "$audit_done" ]; then
+  touch "$sentinel"
 fi
 
-touch "$sentinel"
+# Show reminder once per session (first qualifying command only)
+reminder_shown="$HOME/.claude/hooks/.docs-reminder-shown"
+if [ -f "$reminder_shown" ]; then
+  exit 0
+fi
+touch "$reminder_shown"
+
 msg="DOCS CHECK (Bash): You just ran a structural command in a monitored path:
   $cmd
 This may require updating docs in ~/claude-projects/docs/:

@@ -6,6 +6,7 @@
 # Clean up per-session sentinels from previous session
 rm -f "$HOME/.claude/hooks/.docs-edited-this-session"
 rm -f "$HOME/.claude/hooks/.docs-audit-done"
+rm -f "$HOME/.claude/hooks/.docs-reminder-shown"
 rm -f "$HOME/.claude/hooks/.latexdiff-stop-checked"
 
 docs_dir="$HOME/claude-projects/docs"
