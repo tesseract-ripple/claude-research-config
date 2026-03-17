@@ -2,7 +2,7 @@
 
 Documents the terminal environment: Kitty, tmux, readline, fish shell config.
 
-**Last updated:** 2026-03-05
+**Last updated:** 2026-03-17
 
 ---
 
@@ -34,6 +34,12 @@ window_padding_width 4
 - Avoids a bug where `prefix + o` swaps pane content (instead of cycling focus) when
   Claude Code's approval UI is active — caused by mouse-mode terminal flag changes
 - `prefix + o` still exists but is unreliable; use Alt+hjkl instead
+
+**Pane resizing:** `prefix + H/J/K/L` (left/down/up/right, 5-cell increments)
+- Repeatable (`-r`): press prefix once, then tap direction key within 1000ms window
+- `repeat-time` set to 1000ms (default 500ms) for comfort
+- Uses Shift+hjkl to avoid conflict with lowercase `h` (cheatsheet popup)
+- Avoids `Ctrl+Arrow` which macOS intercepts for desktop switching
 
 **Other bindings:**
 - `prefix + h` — popup cheatsheet (`~/.config/tmux/cheat.md`, rendered with `glow`)

@@ -12,6 +12,7 @@ Prefix: Ctrl+Space
 ^Space %     - vertical split
 ^Space "     - horizontal split
 Alt+h/j/k/l  - navigate panes (no prefix needed)
+^Space H/J/K/L - resize pane left/down/up/right (repeatable, hold key)
 ^Space o     - cycle through panes (avoid: buggy w/ Claude input)
 ^Space x     - kill pane
 ^Space z     - zoom/unzoom pane
