@@ -31,8 +31,25 @@
       "Read(*/secrets/*)"
     ]
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/memory-read-reminder.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/docs-staleness-check.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
@@ -44,6 +61,64 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/latexdiff-baseline-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/docs-update-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/docs-bash-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/memory-periodic-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/subagent-cost-check.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",
@@ -51,6 +126,21 @@
           {
             "type": "command",
             "command": "osascript -e 'display notification \"Task complete\" with title \"Claude Code\" sound name \"Glass\"'"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/latexdiff-stop-check.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/memory-update-reminder.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/docs-semantic-check-gate.sh",
+            "timeout": 5
           }
         ]
       }

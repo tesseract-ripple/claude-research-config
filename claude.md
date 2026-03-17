@@ -171,12 +171,21 @@ Do **not** put user artifact documentation (LaTeX setups, paper notes, tool conf
 
 | Docs file | Update when editing... |
 |---|---|
-| `claude-setup.md` | `~/.claude/` structure, settings.json, agents, skills, MCP servers |
+| `claude-setup.md` | `~/.claude/` structure, settings.json, agents, skills, MCP servers, `~/claude-projects/` directory tree |
 | `latex-setup.md` | LaTeX toolchain, VS Code LaTeX extensions, `.latexmkrc`, bib tools |
 | `terminal-setup.md` | `~/.config/kitty/`, `~/.config/tmux/`, `~/.claude/keybindings.json`, fish config, readline |
 | `claude-usage-widget.md` | `~/claude-projects/claude-usage/`, SwiftBar plugin, `~/.claude/usage-*.json` |
 
 If you edit a config file not covered above but significant enough to document, create a new file under `docs/` and add a row to this table.
+
+### Structural changes (not just file edits)
+Doc updates are also triggered by **structural changes** that don't involve editing existing files:
+- Creating new directories under `~/.claude/` or `~/claude-projects/` (e.g., `git clone`, `mkdir`)
+- Adding/removing scripts, agents, or skills
+- Creating/deleting symlinks
+- Changes to MCP server configuration
+
+These typically happen via Bash, not Edit/Write. The PostToolUse hook on Bash catches structural commands (`mkdir`, `cp`, `mv`, `git clone`) in monitored paths, but only if the command string is recognizable. When in doubt, check docs manually after any Bash command that changes the filesystem structure of monitored directories.
 
 ### General rules
 - Use **targeted edits** — do not rewrite whole files.
