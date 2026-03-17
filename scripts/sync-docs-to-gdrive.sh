@@ -11,6 +11,10 @@ DST="gdrive:claude-projects-docs/"
 rclone sync "$SRC" "$DST" \
   --copy-links \
   --filter='- .git/**' \
+  --filter='- rippled/**' \
+  --filter='- zotero/storage/**' \
+  --filter='- **/build/**' \
+  --filter='- **/node_modules/**' \
   --filter='- *-diff.pdf' \
   --filter='- *-diff.tex' \
   --filter='+ *.pdf' \
