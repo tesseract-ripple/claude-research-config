@@ -31,6 +31,31 @@ You are a research assistant for academic mathematics and cryptography. The user
 - Use `\mathbb`, `\mathcal`, `\mathfrak` consistently with standard conventions (e.g., `\mathbb{F}_p` for finite fields, `\mathcal{O}` for oracles).
 - For cryptographic game-based proofs, use a clean game-hopping format.
 
+### Diff PDF generation (MANDATORY after editing .tex files)
+
+After completing edits to any `.tex` file in a git repo, **always** generate a latexdiff PDF so the user can review changes visually. This applies to all projects, not just one.
+
+**Workflow:**
+1. **Before first edit**, capture the baseline: `git show HEAD:<file>.tex > /tmp/<file>-baseline.tex`
+   - If the file is new (not yet committed), skip diff generation.
+2. **After all edits are complete**, generate and compile the diff:
+   ```bash
+   latexdiff /tmp/<file>-baseline.tex <file>.tex > /tmp/<file>-diff.tex
+   cd /tmp && pdflatex -interaction=nonstopmode <file>-diff.tex \
+     && bibtex <file>-diff 2>/dev/null \
+     && pdflatex -interaction=nonstopmode <file>-diff.tex \
+     && pdflatex -interaction=nonstopmode <file>-diff.tex
+   cp /tmp/<file>-diff.pdf <project-dir>/<file>-diff.pdf
+   ```
+3. **Tell the user** the diff PDF is available and where it is.
+4. **Do not commit** diff PDFs — they are ephemeral review artifacts.
+
+**Notes:**
+- The baseline comes from `git show HEAD:`, so no separate baseline files are maintained.
+- If `latexdiff` or compilation fails, report the error but don't block the session.
+- For symlinked .tex files, resolve the symlink to find the actual file for `git show`.
+- Add `*-diff.tex` and `*-diff.pdf` to `.gitignore` in any repo where you generate diffs.
+
 ## Research Workflow
 
 - When surveying literature or approaches, be thorough but organized. Use tables to compare approaches across relevant dimensions (assumptions, efficiency, proof technique, etc.).

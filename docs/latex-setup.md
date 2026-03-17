@@ -170,6 +170,15 @@ Three bugs were caught and fixed before delivery (all present in current sty):
    conditionals in package option lists. Fixed using `\PassOptionsToPackage`
    before the `\RequirePackage`.
 
+## latexdiff workflow (added 2026-03-17)
+
+After editing any `.tex` file in a git repo, Claude generates a diff PDF for visual review:
+1. Baseline captured from `git show HEAD:<file>.tex` before edits begin
+2. `latexdiff` + `pdflatex` run in `/tmp/` after edits complete
+3. Diff PDF copied to project directory (not committed — gitignored via `*-diff.{tex,pdf}`)
+
+No separate baseline files are maintained. Instructions live in `~/.claude/CLAUDE.md` under "Working With LaTeX > Diff PDF generation".
+
 ## Open questions / future work
 
 - Decide `\E` convention: current `\E[sub]{expr}` uses `\mathbb{E}` via `\Expect`;
