@@ -1,6 +1,6 @@
 #!/bin/bash
 # Auto-commit and push config changes.
-# Runs on a 1-hour interval via launchd.
+# Runs on a 10-minute interval via launchd.
 # Uses Claude (haiku, headless) to create logical commits with
 # descriptive messages. Falls back to a simple bulk commit if
 # Claude is unavailable. Push is always done by the script (not
