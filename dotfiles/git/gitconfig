@@ -1,3 +1,5 @@
 [user]
 	email = tdore@ripple.com
 	name = Tess Dore
+[credential]
+	helper = osxkeychain
