@@ -22,6 +22,10 @@ case "$f" in
 esac
 
 sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
+audit_done="$HOME/.claude/hooks/.docs-audit-done"
+
+# If the audit already ran this session, stay silent — no more reminders or sentinel writes
+[ -f "$audit_done" ] && exit 0
 
 # Edits to docs files themselves are the audit — don't re-trigger the sentinel
 case "$f" in

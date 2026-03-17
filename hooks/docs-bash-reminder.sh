@@ -20,6 +20,10 @@ if ! echo "$cmd" | grep -qE "$monitored"; then
 fi
 
 sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
+audit_done="$HOME/.claude/hooks/.docs-audit-done"
+
+# If the audit already ran this session, stay silent — no more reminders or sentinel writes
+[ -f "$audit_done" ] && exit 0
 
 # Commands targeting docs/ itself are the audit — don't re-trigger the sentinel
 case "$cmd" in
