@@ -1,18 +1,37 @@
 # Claude Code Research Environment Setup
 
-**Date:** 2026-02-11
+**Last updated:** 2026-03-17
 **Account:** Enterprise plan, $480 spending cap, Opus 4.6 default model
 
 ## Architecture
 
-All configuration lives directly in `~/.claude/`, which is where Claude Code reads it. Edit files there and restart `claude` to pick up changes.
+`~/claude-projects/` is a **real local directory** (not on Google Drive). Document files are synced to GDrive for cross-device reading via a background rsync job (see Background Jobs below).
+
+Configuration source of truth is `~/claude-projects/claude-research-config/` (git repo, mirrored to GitHub). Key files in `~/.claude/` are **symlinks** pointing there:
+- `CLAUDE.md` → `claude-research-config/claude.md`
+- `settings.json` → `claude-research-config/settings.json`
+- `agents/`, `skills/`, `scripts/` → `claude-research-config/`
+- `keybindings.json`, `usage-config.json` → `claude-research-config/`
+
+Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) and `~/.latexmkrc`, `~/.gitconfig` also point into `claude-research-config/`.
 
 ```
-~/.claude/                           # All config lives here
-├── CLAUDE.md                        # Global agent instructions
+~/.claude/                           # All config lives here (some symlinked)
+├── CLAUDE.md -> claude-research-config  # Global agent instructions
 ├── memory/
 │   └── MEMORY.md                    # Global memory (auto-maintained)
-├── settings.json                    # Model, permissions, hooks
+├── settings.json -> claude-research-config  # Model, permissions, hooks
+├── hooks/                           # Hook scripts (called by settings.json)
+│   ├── memory-read-reminder.sh      # SessionStart — read memory files
+│   ├── memory-update-reminder.sh    # Stop — update memory files
+│   ├── latexdiff-baseline-reminder.sh # PreToolUse — capture .tex baseline
+│   ├── latexdiff-stop-check.sh      # Stop — block if .tex diffs missing
+│   ├── docs-staleness-check.sh      # SessionStart — compare docs vs actual filesystem
+│   ├── docs-semantic-check-gate.sh  # Stop — semantic audit if config/docs were edited
+│   ├── docs-update-reminder.sh      # PostToolUse (Write|Edit) — docs trigger table
+│   ├── docs-bash-reminder.sh        # PostToolUse (Bash) — structural changes in monitored paths
+│   ├── subagent-cost-check.sh       # SubagentStart — opus cost warning
+│   └── memory-periodic-reminder.sh  # UserPromptSubmit — 30min memory flush
 ├── agents/                          # Subagent definitions
 │   ├── paper-reader.md              # Sonnet — paper summarization
 │   ├── code-explorer.md             # Haiku — codebase navigation
@@ -34,13 +53,21 @@ All configuration lives directly in `~/.claude/`, which is where Claude Code rea
 │   ├── validate-bib/SKILL.md        # /validate-bib — citation validation
 │   └── research-ideation/SKILL.md   # /research-ideation — idea generation
 ├── projects/                        # Per-project CLAUDE.md (shadow dirs, auto-created)
-└── scripts/
-    └── eod-agents.sh                # End-of-day batch runner
+└── scripts/                         # (symlink → claude-research-config/scripts/)
+    ├── eod-agents.sh                # End-of-day batch runner
+    ├── sync-config.sh               # Auto-commit+push config to GitHub (launchd, 5min)
+    └── sync-docs-to-gdrive.sh       # Rsync documents to GDrive (launchd, 5min)
 
 ~/claude-projects/                   # Working directory for Claude-visible repos
+├── claude-research-config/          # Config source of truth (symlinked into ~/.claude/)
 ├── confidential-transactions/       # CT research (LaTeX, PDFs, bib)
 │   └── MEMORY.md                    # Project memory (auto-maintained)
+├── mpt-crypto-clean/                # MPT crypto library (C, secp256k1)
+│   └── MEMORY.md                    # Project memory (auto-maintained)
+├── mpt-crypto-papers/               # MPT-related papers
+├── canton/                          # Canton project
 ├── rippled/                         # xrplf/rippled checkout
+├── claude-usage/                    # Usage tracking widget
 ├── papers-inbox/                    # Drop PDFs here for EOD processing
 ├── eod-reports/                     # Daily reports from eod-agents.sh
 ├── explore-prompts.txt              # Research questions for EOD exploration
@@ -49,14 +76,22 @@ All configuration lives directly in `~/.claude/`, which is where Claude Code rea
 └── docs/                            # This documentation (auto-updated)
 ```
 
+## Background Jobs (launchd)
+
+Two launchd agents run every 5 minutes. Plists in `~/Library/LaunchAgents/`.
+
+| Job | Plist | Script | Purpose |
+|-----|-------|--------|---------|
+| `com.claude.config-sync` | `com.claude.config-sync.plist` | `claude-research-config/scripts/sync-config.sh` | Auto-commit and push config changes to GitHub |
+| `com.claude.docs-gdrive-sync` | `com.claude.docs-gdrive-sync.plist` | `claude-research-config/scripts/sync-docs-to-gdrive.sh` | Rsync document files (pdf, tex, bib, md, txt, png, jpg, svg) to `My Drive/claude-projects-docs/` for cross-device reading. Follows symlinks (`--copy-links`), skips `.git/` and non-document files. |
+
+Logs at `/tmp/claude-config-sync.log` and `/tmp/claude-docs-gdrive-sync.log`.
+
+**Why `~/claude-projects/` is local, not on GDrive:** GDrive's File Provider volume is inaccessible to background launchd agents (macOS TCC restrictions), and GDrive's "My Mac" backup can't handle symlinks. Keeping the directory local avoids both issues. Document files are rsynced to a separate GDrive folder instead.
+
 ## MCP Servers
 
-| Server | Scope | Purpose |
-|---|---|---|
-| `MCP_DOCKER` | user | Docker-based MCP gateway (pre-existing) |
-| `filesystem` | user | Read/write access to `~/claude-projects/` only |
-
-The filesystem server gives Claude direct file access to everything under `~/claude-projects/`.
+No MCP servers are currently configured.
 
 ## Settings
 
@@ -79,8 +114,16 @@ Default: `opus`. Use `/model sonnet` or `/model haiku` in-session for cheaper ta
 
 ### Hooks
 
+All hook logic lives in `~/.claude/hooks/*.sh` scripts (not inline JSON) for maintainability.
+
+- **SessionStart**: (1) Reminds Claude to read global memory (`~/.claude/memory/MEMORY.md`) and project memory (`<project>/MEMORY.md` if it exists, found by walking up from cwd); (2) runs docs staleness check — compares `~/claude-projects/`, `~/.claude/hooks/`, `agents/`, `skills/`, `scripts/` against what `claude-setup.md` documents, and flags discrepancies (pure filesystem checks, zero LLM cost)
 - **Notification**: macOS notification + sound when Claude needs input
-- **Stop**: macOS notification when a task finishes
+- **PreToolUse (Edit)**: On first `.tex` file edit per session, reminds to capture `git show HEAD:` baseline for latexdiff. Silent for non-.tex files or if baseline already exists in `/tmp/`
+- **PostToolUse (Write|Edit)**: Injects docs-trigger-table reminder into context after every file edit, ensuring documentation in `~/claude-projects/docs/` stays in sync
+- **PostToolUse (Bash)**: Checks if Bash commands create/move/copy files in monitored paths (`~/.claude/`, `~/claude-projects/`, `~/.config/`) and reminds about docs updates. Silent for non-structural commands or unmonitored paths
+- **UserPromptSubmit**: Every 30 minutes of active session, reminds to flush memory writes so concurrent sessions in the same directory see updates sooner. Uses sentinel file `~/.claude/hooks/.last-memory-write`; Claude touches it after writing memory to reset the timer
+- **SubagentStart**: Warns when a subagent is spawned with opus model, showing the cost tier rules from CLAUDE.md
+- **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if config/docs were edited this session (tracked by `.docs-edited-this-session` sentinel), injects a semantic audit prompt — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping
 
 These support the Hashimoto workflow pattern: run agents in the background, don't context-switch, check results during natural breaks.
 
