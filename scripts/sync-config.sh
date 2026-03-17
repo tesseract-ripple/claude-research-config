@@ -1,6 +1,6 @@
 #!/bin/bash
 # Auto-commit and push config changes.
-# Runs on a 5-minute interval via launchd.
+# Runs on a 1-hour interval via launchd.
 # Uses Claude (haiku, headless) to create logical commits with
 # descriptive messages. Falls back to a simple bulk commit if
 # Claude is unavailable. Push is always done by the script (not
@@ -10,13 +10,29 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_DIR"
 
-# Prevent overlapping runs
 LOCKFILE="/tmp/claude-config-sync.lock"
+BACKOFF_FILE="/tmp/claude-config-sync.backoff"
+LOG="/tmp/claude-config-sync.log"
+
+# Prevent overlapping runs
 if ! mkdir "$LOCKFILE" 2>/dev/null; then
-    echo "$(date): sync already running, skipping" >> /tmp/claude-config-sync.log
+    echo "$(date): sync already running, skipping" >> "$LOG"
     exit 0
 fi
 trap 'rmdir "$LOCKFILE" 2>/dev/null' EXIT
+
+# Exponential backoff on repeated failures
+if [[ -f "$BACKOFF_FILE" ]]; then
+    failures=$(cat "$BACKOFF_FILE")
+    backoff_until=$(stat -f %m "$BACKOFF_FILE" 2>/dev/null || echo 0)
+    wait_secs=$(( (2 ** failures) * 60 ))
+    resume_at=$(( backoff_until + wait_secs ))
+    now=$(date +%s)
+    if (( now < resume_at )); then
+        echo "$(date): backing off (${failures} failures, next try in $(( resume_at - now ))s)" >> "$LOG"
+        exit 0
+    fi
+fi
 
 # Only proceed if there are changes
 if git diff --quiet && git diff --cached --quiet && [[ -z "$(git ls-files --others --exclude-standard)" ]]; then
@@ -45,14 +61,21 @@ Rules:
 - Be concise. Do not explain what you're doing — just do it.
 PROMPT
 
-    claude --model haiku \
+    if claude --model haiku \
         --allowedTools 'Bash(git add:*)' \
         --allowedTools 'Bash(git commit:*)' \
         --allowedTools 'Bash(git diff:*)' \
         --allowedTools 'Bash(git status:*)' \
         --allowedTools 'Bash(git ls-files:*)' \
         --allowedTools 'Bash(git log:*)' \
-        -p "$(cat "$PROMPT_FILE")" >> /tmp/claude-config-sync.log 2>&1 || true
+        -p "$(cat "$PROMPT_FILE")" >> "$LOG" 2>&1; then
+        rm -f "$BACKOFF_FILE"
+    else
+        failures=0
+        [[ -f "$BACKOFF_FILE" ]] && failures=$(cat "$BACKOFF_FILE")
+        echo $(( failures + 1 )) > "$BACKOFF_FILE"
+        echo "$(date): claude commit failed (failure #$(( failures + 1 )))" >> "$LOG"
+    fi
     rm -f "$PROMPT_FILE"
 
     # Check if Claude committed everything
