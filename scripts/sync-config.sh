@@ -10,6 +10,14 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_DIR"
 
+# Prevent overlapping runs
+LOCKFILE="/tmp/claude-config-sync.lock"
+if ! mkdir "$LOCKFILE" 2>/dev/null; then
+    echo "$(date): sync already running, skipping" >> /tmp/claude-config-sync.log
+    exit 0
+fi
+trap 'rmdir "$LOCKFILE" 2>/dev/null' EXIT
+
 # Only proceed if there are changes
 if git diff --quiet && git diff --cached --quiet && [[ -z "$(git ls-files --others --exclude-standard)" ]]; then
     exit 0
