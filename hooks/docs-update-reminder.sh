@@ -21,9 +21,19 @@ case "$f" in
   */claude-usage/*) doc="claude-usage-widget.md" ;;
 esac
 
+sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
+
+# Edits to docs files themselves are the audit — don't re-trigger the sentinel
+case "$f" in
+  */claude-projects/docs/*) exit 0 ;;
+esac
+
+# First qualifying edit: show reminder and set sentinel for Stop audit
+# Subsequent edits: silently ensure sentinel exists, skip the reminder
+if [ -f "$sentinel" ]; then
+  exit 0
+fi
+
+touch "$sentinel"
 msg="DOCS CHECK: You edited '$f'. Update ~/claude-projects/docs/$doc if needed."
-
-# Mark that config/docs were touched this session (gates semantic check at Stop)
-touch "$HOME/.claude/hooks/.docs-edited-this-session"
-
 jq -n --arg msg "$msg" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$msg}}'

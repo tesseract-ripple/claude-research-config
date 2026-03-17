@@ -3,6 +3,11 @@
 # Pure filesystem checks — no LLM calls, no API calls.
 # Silent when everything matches; outputs discrepancies as additionalContext.
 
+# Clean up per-session sentinels from previous session
+rm -f "$HOME/.claude/hooks/.docs-edited-this-session"
+rm -f "$HOME/.claude/hooks/.docs-audit-done"
+rm -f "$HOME/.claude/hooks/.latexdiff-stop-checked"
+
 docs_dir="$HOME/claude-projects/docs"
 setup_doc="$docs_dir/claude-setup.md"
 terminal_doc="$docs_dir/terminal-setup.md"

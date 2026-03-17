@@ -55,8 +55,8 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 ├── projects/                        # Per-project CLAUDE.md (shadow dirs, auto-created)
 └── scripts/                         # (symlink → claude-research-config/scripts/)
     ├── eod-agents.sh                # End-of-day batch runner
-    ├── sync-config.sh               # Auto-commit+push config to GitHub (launchd, 5min)
-    └── sync-docs-to-gdrive.sh       # Rsync documents to GDrive (launchd, 5min)
+    ├── sync-config.sh               # Auto-commit+push config to GitHub (launchd, 10min)
+    └── sync-docs-to-gdrive.sh       # rclone documents to GDrive (launchd, 10min)
 
 ~/claude-projects/                   # Working directory for Claude-visible repos
 ├── claude-research-config/          # Config source of truth (symlinked into ~/.claude/)
@@ -66,6 +66,7 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 │   └── MEMORY.md                    # Project memory (auto-maintained)
 ├── mpt-crypto-papers/               # MPT-related papers
 ├── canton/                          # Canton project
+├── ripple-claude-marketplace/       # GitLab: ripple/ai/claude-marketplace
 ├── rippled/                         # xrplf/rippled checkout
 ├── claude-usage/                    # Usage tracking widget
 ├── papers-inbox/                    # Drop PDFs here for EOD processing
@@ -78,16 +79,16 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 
 ## Background Jobs (launchd)
 
-Two launchd agents run every 5 minutes. Plists in `~/Library/LaunchAgents/`.
+Two launchd agents run every 10 minutes. Plists in `~/Library/LaunchAgents/`. Both have lock files and exponential backoff on failure.
 
 | Job | Plist | Script | Purpose |
 |-----|-------|--------|---------|
-| `com.claude.config-sync` | `com.claude.config-sync.plist` | `claude-research-config/scripts/sync-config.sh` | Auto-commit and push config changes to GitHub |
-| `com.claude.docs-gdrive-sync` | `com.claude.docs-gdrive-sync.plist` | `claude-research-config/scripts/sync-docs-to-gdrive.sh` | Rsync document files (pdf, tex, bib, md, txt, png, jpg, svg) to `My Drive/claude-projects-docs/` for cross-device reading. Follows symlinks (`--copy-links`), skips `.git/` and non-document files. |
+| `com.claude.config-sync` | `com.claude.config-sync.plist` | `claude-research-config/scripts/sync-config.sh` | Auto-commit and push config changes to GitHub. Skips if no uncommitted changes (`git diff --quiet`). |
+| `com.claude.docs-gdrive-sync` | `com.claude.docs-gdrive-sync.plist` | `claude-research-config/scripts/sync-docs-to-gdrive.sh` | rclone document files (pdf, tex, bib, md, txt, png, jpg, svg) to `gdrive:claude-projects-docs/` for cross-device reading. Follows symlinks (`-L`), skips `.git/` and non-document files. Cheap local `find -newer` check skips rclone if nothing changed since last sync. |
 
 Logs at `/tmp/claude-config-sync.log` and `/tmp/claude-docs-gdrive-sync.log`.
 
-**Why `~/claude-projects/` is local, not on GDrive:** GDrive's File Provider volume is inaccessible to background launchd agents (macOS TCC restrictions), and GDrive's "My Mac" backup can't handle symlinks. Keeping the directory local avoids both issues. Document files are rsynced to a separate GDrive folder instead.
+**Why `~/claude-projects/` is local, not on GDrive:** GDrive's File Provider volume is inaccessible to background launchd agents (macOS TCC restrictions), and GDrive's "My Mac" backup can't handle symlinks. Keeping the directory local avoids both issues. Document files are synced via rclone to a separate GDrive folder instead.
 
 ## MCP Servers
 
@@ -119,11 +120,11 @@ All hook logic lives in `~/.claude/hooks/*.sh` scripts (not inline JSON) for mai
 - **SessionStart**: (1) Reminds Claude to read global memory (`~/.claude/memory/MEMORY.md`) and project memory (`<project>/MEMORY.md` if it exists, found by walking up from cwd); (2) runs docs staleness check — compares `~/claude-projects/`, `~/.claude/hooks/`, `agents/`, `skills/`, `scripts/` against what `claude-setup.md` documents, and flags discrepancies (pure filesystem checks, zero LLM cost)
 - **Notification**: macOS notification + sound when Claude needs input
 - **PreToolUse (Edit)**: On first `.tex` file edit per session, reminds to capture `git show HEAD:` baseline for latexdiff. Silent for non-.tex files or if baseline already exists in `/tmp/`
-- **PostToolUse (Write|Edit)**: Injects docs-trigger-table reminder into context after every file edit, ensuring documentation in `~/claude-projects/docs/` stays in sync
-- **PostToolUse (Bash)**: Checks if Bash commands create/move/copy files in monitored paths (`~/.claude/`, `~/claude-projects/`, `~/.config/`) and reminds about docs updates. Silent for non-structural commands or unmonitored paths
+- **PostToolUse (Write|Edit)**: On first qualifying edit per session, injects docs-trigger-table reminder and sets sentinel for Stop audit. Silent on subsequent edits (once-per-session)
+- **PostToolUse (Bash)**: On first structural command in monitored paths (`~/.claude/`, `~/claude-projects/`, `~/.config/`) per session, reminds about docs updates and sets sentinel. Silent on subsequent commands or unmonitored paths
 - **UserPromptSubmit**: Every 30 minutes of active session, reminds to flush memory writes so concurrent sessions in the same directory see updates sooner. Uses sentinel file `~/.claude/hooks/.last-memory-write`; Claude touches it after writing memory to reset the timer
 - **SubagentStart**: Warns when a subagent is spawned with opus model, showing the cost tier rules from CLAUDE.md
-- **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if config/docs were edited this session (tracked by `.docs-edited-this-session` sentinel), injects a semantic audit prompt — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping
+- **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if config/docs were edited this session (tracked by `.docs-edited-this-session` sentinel), blocks stop with `decision:block` — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping. Sentinel is removed before blocking to prevent infinite loops. Only fires when Claude stops naturally (not on Ctrl+C/exit)
 
 These support the Hashimoto workflow pattern: run agents in the background, don't context-switch, check results during natural breaks.
 

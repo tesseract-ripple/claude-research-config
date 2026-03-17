@@ -19,6 +19,20 @@ if ! echo "$cmd" | grep -qE "$monitored"; then
   exit 0  # structural command but not in a monitored path
 fi
 
+sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
+
+# Commands targeting docs/ itself are the audit — don't re-trigger the sentinel
+case "$cmd" in
+  *claude-projects/docs/*) exit 0 ;;
+esac
+
+# First qualifying command: show reminder and set sentinel for Stop audit
+# Subsequent commands: silently ensure sentinel exists, skip the reminder
+if [ -f "$sentinel" ]; then
+  exit 0
+fi
+
+touch "$sentinel"
 msg="DOCS CHECK (Bash): You just ran a structural command in a monitored path:
   $cmd
 This may require updating docs in ~/claude-projects/docs/:
@@ -29,8 +43,4 @@ This may require updating docs in ~/claude-projects/docs/:
 | terminal-setup.md | ~/.config/kitty/, ~/.config/tmux/, ~/.claude/keybindings.json, fish config |
 | claude-usage-widget.md | ~/claude-projects/claude-usage/, SwiftBar plugin |
 Check if the directory tree or other sections need updating."
-
-# Mark that config/docs were touched this session (gates semantic check at Stop)
-touch "$HOME/.claude/hooks/.docs-edited-this-session"
-
 jq -n --arg msg "$msg" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$msg}}'
