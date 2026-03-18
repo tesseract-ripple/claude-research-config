@@ -118,16 +118,20 @@ Commit and PR attribution suppressed (empty strings). No "Co-Authored-By" lines 
 ### Permissions
 
 **Auto-allowed (no prompt):**
-- Python, SageMath, LaTeX, C/C++ compilation
-- Git read-only operations (log, diff, status, show)
+- Python, SageMath, LaTeX, latexdiff, C/C++ compilation
+- Git read-only operations (log, diff, status, show) — bare and via `git -C`
+- Git local write operations (add, commit, branch, stash) — bare and via `git -C`
+- Edit/Write for docs (`~/claude-projects/docs/*`) and memory (`*MEMORY.md`) files
 - File reading, search, web search
+- `touch`, `cp * /tmp/*` (for hook sentinels and latexdiff workflows)
 
 **Auto-denied:**
-- `rm -rf`, `git push`, `git checkout --`, `git reset --hard`
+- `rm -rf`, `git push`, `git checkout --`, `git reset --hard` (bare and `git -C` forms)
 - Reading `.env` files or `secrets/` directories
 
 **Prompted (requires confirmation):**
-- Everything else (git commit, file writes, etc.)
+- File writes/edits outside docs and memory paths
+- Any git operation not listed above
 
 ### Hooks
 
