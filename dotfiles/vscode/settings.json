@@ -49,7 +49,7 @@
         "-m"
     ],
     "latex-workshop.formatting.latex": "latexindent",
-    "latex-workshop.chktex.path": "/Library/TeX/texbin/chktex",
+    "latex-workshop.linting.chktex.exec.path": "/Library/TeX/texbin/chktex",
     "[latex]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "james-yu.latex-workshop",

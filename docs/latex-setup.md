@@ -34,7 +34,16 @@ cp ~/.config/latex-export/latex.json \
    "$HOME/Library/Application Support/Code/User/snippets/latex.json"
 ```
 
-### 3. VSCode extensions installed
+### 3. ChkTeX linting
+
+ChkTeX is at `/Library/TeX/texbin/chktex`. VS Code can't find it by default because
+`/Library/TeX/texbin` isn't in the PATH VS Code inherits. Fixed via:
+
+```json
+"latex-workshop.linting.chktex.exec.path": "/Library/TeX/texbin/chktex"
+```
+
+### 4. VSCode extensions installed
 
 | Extension | ID | Purpose |
 |---|---|---|
@@ -42,7 +51,7 @@ cp ~/.config/latex-export/latex.json \
 | LTeX | `valentjn.vscode-ltex` | Grammar/spell check, LaTeX-aware |
 | LaTeX (mathematic) | `mathematic.vscode-latex` | Syntax highlighting, symbol autocomplete |
 
-### 4. `~/.latexmkrc`
+### 5. `~/.latexmkrc`
 
 Created at `~/.latexmkrc`: pdflatex mode, biber, default file `main.tex`,
 cleans `bbl bcf run.xml synctex.gz`. Commands use full paths
@@ -50,7 +59,7 @@ cleans `bbl bcf run.xml synctex.gz`. Commands use full paths
 latexmk works in environments without `/Library/TeX/texbin` on `$PATH`
 (e.g., VS Code LaTeX Workshop).
 
-### 5. Word wrap at 100 columns (format on save)
+### 6. Word wrap at 100 columns (format on save)
 
 `latexindent` (ships with MacTeX) handles hard-wrapping. Required missing Perl
 modules installed via brew Perl (`File::HomeDir`, `YAML::Tiny`).
