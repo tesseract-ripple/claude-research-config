@@ -30,6 +30,7 @@ You are a research assistant for academic mathematics and cryptography. The user
 - Follow the user's existing document style. Don't restructure documents without asking.
 - Use `\mathbb`, `\mathcal`, `\mathfrak` consistently with standard conventions (e.g., `\mathbb{F}_p` for finite fields, `\mathcal{O}` for oracles).
 - For cryptographic game-based proofs, use a clean game-hopping format.
+- **Zero warnings policy.** After compiling, check for and fix all LaTeX warnings. In particular: wrap any math in section/subsection titles with `\texorpdfstring{<latex>}{<plaintext>}` to avoid hyperref "Token not allowed in a PDF string" warnings. This includes inline `$...$` in titles, not just display math.
 
 ### Diff PDF generation (MANDATORY after editing .tex files)
 
@@ -167,16 +168,30 @@ Update when you **add, remove, or change**:
 
 Do **not** put user artifact documentation (LaTeX setups, paper notes, tool configs) in `claude-setup.md`. That content belongs in its own file under `docs/`.
 
-### Other docs files — known file→trigger mapping
+### Other docs files — known trigger mapping
 
-| Docs file | Update when editing... |
+Docs updates are triggered by **two kinds of changes**:
+
+**1. File edits** — editing a config file or script in a monitored path:
+
+| Docs file | Triggered by file edits in... |
 |---|---|
 | `claude-setup.md` | `~/.claude/` structure, settings.json, agents, skills, MCP servers, `~/claude-projects/` directory tree |
 | `latex-setup.md` | LaTeX toolchain, VS Code LaTeX extensions, `.latexmkrc`, bib tools |
 | `terminal-setup.md` | `~/.config/kitty/`, `~/.config/tmux/`, `~/.claude/keybindings.json`, fish config, readline |
 | `claude-usage-widget.md` | `~/claude-projects/claude-usage/`, SwiftBar plugin, `~/.claude/usage-*.json` |
 
-If you edit a config file not covered above but significant enough to document, create a new file under `docs/` and add a row to this table.
+**2. Policy/convention changes** — adding or changing rules in `CLAUDE.md` that affect a documented domain:
+
+| Docs file | Also triggered by policy changes about... |
+|---|---|
+| `latex-setup.md` | LaTeX compilation policies, document conventions, formatting rules, package usage guidelines |
+| `terminal-setup.md` | Shell conventions, keybinding policies, tmux workflow rules |
+| `claude-setup.md` | Hook behavior policies, memory system rules, subagent model selection rules, cost guidelines |
+
+A policy change is anything in `CLAUDE.md` that a reader of the corresponding docs file would want to know — e.g., "zero warnings" is a LaTeX compilation policy that belongs in `latex-setup.md`, not just in `CLAUDE.md`.
+
+If you edit a config file or add a policy not covered above but significant enough to document, create a new file under `docs/` and add a row to the relevant table.
 
 ### Structural changes (not just file edits)
 Doc updates are also triggered by **structural changes** that don't involve editing existing files:

@@ -179,6 +179,12 @@ After editing any `.tex` file in a git repo, Claude generates a diff PDF for vis
 
 No separate baseline files are maintained. Instructions live in `~/.claude/CLAUDE.md` under "Working With LaTeX > Diff PDF generation".
 
+## Compilation policies
+
+- **Zero warnings.** All LaTeX documents should compile with zero warnings. After compiling, check for and fix all warnings before considering the build clean.
+- **hyperref `\texorpdfstring`.** Any math (`$...$`) in `\section`, `\subsection`, or other sectioning commands must be wrapped in `\texorpdfstring{<latex>}{<plaintext>}` to avoid "Token not allowed in a PDF string" warnings. This includes inline math fragments like `1-to-$N$`, not just standalone math expressions.
+- **Float specifiers.** Use `[ht]` or `[htbp]` rather than bare `[h]` to avoid "float specifier changed" warnings.
+
 ## Open questions / future work
 
 - Decide `\E` convention: current `\E[sub]{expr}` uses `\mathbb{E}` via `\Expect`;
