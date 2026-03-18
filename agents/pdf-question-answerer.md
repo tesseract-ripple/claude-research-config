@@ -1,7 +1,7 @@
 ---
 name: pdf-question-answerer
 description: Analyzes scientific PDFs to answer questions, extract results, compare papers, and interpret mathematical content. Use when studying papers.
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 tools: Read, Grep, Glob
 ---
 

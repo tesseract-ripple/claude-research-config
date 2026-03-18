@@ -1,7 +1,7 @@
 ---
 name: paper-reader
 description: Reads and summarizes academic papers in cryptography, mathematics, and distributed systems. Use when analyzing PDFs, eprints, or research documents.
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 ---
 

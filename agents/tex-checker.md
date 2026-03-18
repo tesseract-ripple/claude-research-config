@@ -1,7 +1,7 @@
 ---
 name: tex-checker
 description: Checks LaTeX documents for grammar, notation consistency, and style issues. Use when preparing papers for submission or review.
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 tools: Read, Grep, Glob
 ---
 

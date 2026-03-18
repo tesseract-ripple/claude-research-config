@@ -1,7 +1,7 @@
 ---
 name: scientific-tex-editor
 description: Expert scientific editing for LaTeX documents. Reviews clarity, notation consistency, argument flow, and publication readiness. Use when polishing paper drafts.
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 tools: Read, Grep, Glob, Edit
 ---
 

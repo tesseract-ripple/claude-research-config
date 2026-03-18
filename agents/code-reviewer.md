@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Reviews C++ and Rust code changes for correctness, safety, and style. Use when reviewing diffs, PRs, or prototype implementations.
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 tools: Read, Grep, Glob, Bash
 ---
 
