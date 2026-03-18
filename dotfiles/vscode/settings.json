@@ -52,5 +52,6 @@
         "editor.defaultFormatter": "james-yu.latex-workshop",
         "editor.wordWrap": "off",
         "editor.rulers": [100]
-    }
+    },
+    "git.openRepositoryInParentFolders": "always"
 }
