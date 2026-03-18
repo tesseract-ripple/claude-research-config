@@ -77,14 +77,15 @@ Use the cheapest model that can handle the task correctly. This applies to **sub
 | Tier | Model | Use for | Examples |
 |------|-------|---------|----------|
 | **1 — Cheap** | Haiku | Simple chat, quick factual Q&A, trivial lookups, memory reads/updates, formatting, boilerplate | "What's the BIP for Pedersen commitments?", grep/glob searches, updating MEMORY.md, generating LaTeX boilerplate |
-| **2 — Standard** | Sonnet | File editing, routine code, configuration, LaTeX drafting/editing, literature search & summarization, standard debugging, codebase exploration | Writing a Python test harness, editing `.bib` files, refactoring a section, searching for papers on a known topic |
-| **3 — Heavy** | Opus | Deep reasoning, proof construction & verification, security/correctness analysis, reading & understanding papers, conceptual synthesis, novel research, complex code review | Verifying a reduction, analyzing whether a construction is binding under CDH, synthesizing results across papers, reviewing crypto code for soundness |
+| **2 — Standard** | Sonnet | **Default for almost everything**: file editing, routine code, configuration, LaTeX drafting/editing, literature search, **paper reading & summarization**, **synthesis across papers**, **document writing**, codebase exploration, **code review**, standard debugging, research ideation | Writing a Python test harness, reading a paper and extracting results, summarizing related work, editing `.bib` files, refactoring a LaTeX section, reviewing a PR |
+| **3 — Heavy** | Opus | **Narrow correctness-critical tasks only**: (1) verifying a specific proof or reduction for mathematical soundness, (2) determining whether a specific construction satisfies a specific security property (binding, hiding, ZK, simulation), (3) finding a subtle error in a mathematical argument | "Is this reduction tight?", "Does this construction achieve binding under CDH?", "Find the flaw in this proof sketch" |
 
 **Rules of thumb:**
-- Default subagents to **haiku** unless the task requires writing/editing files (→ sonnet) or reasoning about correctness (→ opus).
-- If a task *might* need opus but you're unsure, start with sonnet. Escalate only if the output quality is insufficient.
-- The main conversation model is the user's choice — do not suggest switching unless the task clearly mismatches (e.g., opus for a trivial rename, or haiku for a proof).
-- **When in doubt, ask.** If you're unsure whether a task warrants opus, ask the user before escalating.
+- **Sonnet is the default for research work** — paper reading, synthesis, document writing, code review, and most math tasks. Start there.
+- **Opus is for correctness judgments only.** If the task is "tell me about X", "write Y", "find Z", "review W", or "explain Q" — that is Sonnet. If the task is "is this *correct*?" or "does this *hold*?" about a specific cryptographic or mathematical claim, that *may* warrant Opus.
+- Default subagents to **haiku** unless the task requires writing/editing files (→ sonnet) or making a specific correctness determination about a proof/construction (→ opus, only with clear justification).
+- **Never use opus without asking** if the need isn't clearly in the narrow correctness-critical category. If unsure, use sonnet and only escalate if the output is genuinely insufficient.
+- The main conversation model is the user's choice — do not suggest switching unless the task clearly mismatches.
 
 ## Tool Usage
 

@@ -1,7 +1,7 @@
 # Claude Code Research Environment Setup
 
-**Last updated:** 2026-03-17
-**Account:** Enterprise plan, $480 spending cap, Opus 4.6 default model
+**Last updated:** 2026-03-18
+**Account:** Enterprise plan, $480 spending cap, Sonnet 4.6 default model
 
 ## Architecture
 
@@ -110,7 +110,7 @@ Configured in `~/.claude/.mcp.json`.
 ## Settings
 
 ### Model
-Default: `opus`. Use `/model sonnet` or `/model haiku` in-session for cheaper tasks.
+Default: `sonnet`. Use `/model haiku` in-session for trivial tasks, `/model opus` only for correctness-critical math/crypto reasoning (proof verification, security property checks).
 
 ### Attribution
 Commit and PR attribution suppressed (empty strings). No "Co-Authored-By" lines or AI mentions in commits/PRs, per Ripple convention.
@@ -151,7 +151,7 @@ All hook logic lives in `~/.claude/hooks/*.sh` scripts (not inline JSON) for mai
 - **PostToolUse (Write|Edit)**: On qualifying edits to monitored paths, appends the current `session_id` to the sentinel file (deduped). Reminder shown once per session. Edits to `docs/*` are excluded (audit output, not input). Session-ID-based sentinels allow concurrent sessions without cross-talk
 - **PostToolUse (Bash)**: On structural commands (`mkdir`, `cp`, `mv`, `git clone`, `touch`) in monitored paths (`~/.claude/`, `~/claude-projects/{claude-research-config,docs,claude-usage}/`, `~/.config/{kitty,tmux}/`), appends the current `session_id` to the sentinel file (deduped). Reminder shown once per session. Commands targeting `docs/*` or `sentinels/*` are excluded
 - **UserPromptSubmit**: Every 30 minutes of active session, reminds to flush memory writes so concurrent sessions in the same directory see updates sooner. Uses sentinel file `~/.claude/hooks/sentinels/last-memory-write`; Claude touches it after writing memory to reset the timer
-- **SubagentStart**: Warns when a subagent is spawned with opus model, showing the cost tier rules from CLAUDE.md
+- **SubagentStart**: Warns (with explicit block list) when a subagent is spawned with opus, listing tasks that do NOT warrant opus (paper reading, synthesis, writing, code review) vs. the narrow set that do (proof verification, security property checks, finding mathematical errors)
 - **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if the current `session_id` appears in the `docs-edited-this-session` sentinel, blocks stop with `decision:block` — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping. That session's line is removed before blocking; other sessions' entries are untouched. Empty sentinel files are cleaned up automatically. Loop prevention: audit edits only touch `docs/*`, which is excluded from re-setting the sentinel. Only fires when Claude stops naturally (not on Ctrl+C/exit)
 
 These support the Hashimoto workflow pattern: run agents in the background, don't context-switch, check results during natural breaks.
@@ -172,8 +172,8 @@ Agents are invoked automatically by Claude when relevant, or manually via the Ta
 
 ### Cost rationale
 - Haiku (~1/15 Opus cost): mechanical tasks (file scanning, link checking, codebase search)
-- Sonnet (~1/5 Opus cost): tasks needing understanding but not deep reasoning
-- Opus: reserved for main session — proofs, complex math, novel research
+- Sonnet (~1/5 Opus cost): default for almost all research work — paper reading, synthesis, document writing, code review, LaTeX editing
+- Opus: narrow correctness-critical tasks only — verifying a specific proof/reduction, checking a specific security property, finding a subtle mathematical error. Not for synthesis, paper reading, or writing.
 
 ## Skills / Slash Commands (14 total)
 
