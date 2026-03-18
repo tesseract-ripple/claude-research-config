@@ -1,7 +1,7 @@
 #!/bin/bash
 # Stop hook: remind Claude to update memory files before ending.
 # Only fires if >30 min since last memory write (avoids noise on short sessions).
-sentinel="$HOME/.claude/hooks/.last-memory-write"
+sentinel="$HOME/.claude/hooks/sentinels/last-memory-write"
 threshold=1800
 if [ -f "$sentinel" ]; then
   last_write=$(stat -f %m "$sentinel" 2>/dev/null || echo 0)

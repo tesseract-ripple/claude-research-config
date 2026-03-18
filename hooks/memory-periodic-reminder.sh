@@ -2,7 +2,7 @@
 # UserPromptSubmit hook: periodically remind to write memory
 # Uses a sentinel file to avoid reminding on every message.
 # Reminds if >30 minutes since last memory write (or if sentinel doesn't exist).
-sentinel="$HOME/.claude/hooks/.last-memory-write"
+sentinel="$HOME/.claude/hooks/sentinels/last-memory-write"
 threshold=1800  # 30 minutes in seconds
 
 if [ -f "$sentinel" ]; then
@@ -36,7 +36,7 @@ if [ -n "$project_mem" ]; then
 - Project: $project_mem"
 fi
 msg="$msg
-After writing, run: touch ~/.claude/hooks/.last-memory-write (to reset the timer).
+After writing, run: touch ~/.claude/hooks/sentinels/last-memory-write (to reset the timer).
 If nothing worth recording has happened, ignore this reminder."
 
 # Reset the timer so we don't fire again for another 30 minutes

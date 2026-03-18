@@ -5,8 +5,8 @@
 # The sentinel is removed on first fire to prevent infinite loops.
 INPUT=$(cat)
 
-sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
-audit_done="$HOME/.claude/hooks/.docs-audit-done"
+sentinel="$HOME/.claude/hooks/sentinels/docs-edited-this-session"
+audit_done="$HOME/.claude/hooks/sentinels/docs-audit-done"
 
 if [ ! -f "$sentinel" ]; then
   exit 0

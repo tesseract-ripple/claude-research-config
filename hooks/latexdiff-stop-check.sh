@@ -1,7 +1,7 @@
 #!/bin/bash
 # Stop hook: block if .tex files have uncommitted changes without diff PDFs.
 # Only blocks once per session to prevent infinite loops.
-sentinel="$HOME/.claude/hooks/.latexdiff-stop-checked"
+sentinel="$HOME/.claude/hooks/sentinels/latexdiff-stop-checked"
 
 if [ -f "$sentinel" ]; then
   exit 0

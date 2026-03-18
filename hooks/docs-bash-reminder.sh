@@ -19,12 +19,14 @@ if ! echo "$cmd" | grep -qE "$monitored"; then
 fi
 
 # Commands targeting docs/ itself are the audit output — no reminder needed
+# Touching sentinel dotfiles in hooks/ is not a structural change
 case "$cmd" in
   *claude-projects/docs/*) exit 0 ;;
+  */.claude/hooks/sentinels/*) exit 0 ;;
 esac
 
-sentinel="$HOME/.claude/hooks/.docs-edited-this-session"
-audit_done="$HOME/.claude/hooks/.docs-audit-done"
+sentinel="$HOME/.claude/hooks/sentinels/docs-edited-this-session"
+audit_done="$HOME/.claude/hooks/sentinels/docs-audit-done"
 
 # Always set the sentinel (gates the Stop audit), UNLESS audit already ran —
 # in that case, still show the reminder but don't re-arm the Stop hook
@@ -33,7 +35,7 @@ if [ ! -f "$audit_done" ]; then
 fi
 
 # Show reminder once per session (first qualifying command only)
-reminder_shown="$HOME/.claude/hooks/.docs-reminder-shown"
+reminder_shown="$HOME/.claude/hooks/sentinels/docs-reminder-shown"
 if [ -f "$reminder_shown" ]; then
   exit 0
 fi

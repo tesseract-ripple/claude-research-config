@@ -4,10 +4,8 @@
 # Silent when everything matches; outputs discrepancies as additionalContext.
 
 # Clean up per-session sentinels from previous session
-rm -f "$HOME/.claude/hooks/.docs-edited-this-session"
-rm -f "$HOME/.claude/hooks/.docs-audit-done"
-rm -f "$HOME/.claude/hooks/.docs-reminder-shown"
-rm -f "$HOME/.claude/hooks/.latexdiff-stop-checked"
+rm -rf "$HOME/.claude/hooks/sentinels"
+mkdir -p "$HOME/.claude/hooks/sentinels"
 
 docs_dir="$HOME/claude-projects/docs"
 setup_doc="$docs_dir/claude-setup.md"
