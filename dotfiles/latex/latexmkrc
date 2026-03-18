@@ -1,7 +1,7 @@
 # ~/.latexmkrc
 $pdf_mode        = 1;          # use pdflatex
 $bibtex_use      = 2;          # run biber
-$biber           = 'biber %O %S';
-$pdflatex        = 'pdflatex -synctex=1 -interaction=nonstopmode %O %S';
+$biber           = '/Library/TeX/texbin/biber %O %S';
+$pdflatex        = '/Library/TeX/texbin/pdflatex -synctex=1 -interaction=nonstopmode %O %S';
 @default_files   = ('main.tex');
 $clean_ext       = 'bbl bcf run.xml synctex.gz';

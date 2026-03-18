@@ -45,7 +45,10 @@ cp ~/.config/latex-export/latex.json \
 ### 4. `~/.latexmkrc`
 
 Created at `~/.latexmkrc`: pdflatex mode, biber, default file `main.tex`,
-cleans `bbl bcf run.xml synctex.gz`.
+cleans `bbl bcf run.xml synctex.gz`. Commands use full paths
+(`/Library/TeX/texbin/pdflatex`, `/Library/TeX/texbin/biber`) so that
+latexmk works in environments without `/Library/TeX/texbin` on `$PATH`
+(e.g., VS Code LaTeX Workshop).
 
 ### 5. Word wrap at 100 columns (format on save)
 
