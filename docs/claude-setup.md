@@ -37,7 +37,8 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 │       ├── last-memory-write        # Timestamp for 30-min memory flush timer
 │       ├── docs-edited-this-session # Gates Stop audit (session IDs, one per line)
 │       ├── docs-reminder-shown      # Once-per-session docs reminder (session IDs, one per line)
-│       └── latexdiff-stop-checked   # Once-per-session latexdiff block
+│       ├── latexdiff-stop-checked   # Once-per-session latexdiff block
+│       └── low-token-warned         # Once-per-session budget warning (session IDs)
 ├── agents/                          # Subagent definitions
 │   ├── paper-reader.md              # Sonnet — paper summarization
 │   ├── code-explorer.md             # Haiku — codebase navigation
