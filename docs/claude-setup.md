@@ -10,7 +10,7 @@
 Configuration source of truth is `~/claude-projects/claude-research-config/` (git repo, mirrored to GitHub). Key files in `~/.claude/` are **symlinks** pointing there:
 - `CLAUDE.md` → `claude-research-config/claude.md`
 - `settings.json` → `claude-research-config/settings.json`
-- `agents/`, `skills/`, `scripts/` → `claude-research-config/`
+- `agents/`, `skills/`, `scripts/` → `claude-research-config/` (directory-level symlinks — edits to source take effect immediately, no re-install needed)
 - `keybindings.json`, `usage-config.json` → `claude-research-config/`
 
 Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) and `~/.latexmkrc`, `~/.gitconfig` also point into `claude-research-config/`.
@@ -151,7 +151,7 @@ All hook logic lives in `~/.claude/hooks/*.sh` scripts (not inline JSON) for mai
 - **PostToolUse (Write|Edit)**: On qualifying edits to monitored paths, appends the current `session_id` to the sentinel file (deduped). Reminder shown once per session. Edits to `docs/*` are excluded (audit output, not input). Session-ID-based sentinels allow concurrent sessions without cross-talk
 - **PostToolUse (Bash)**: On structural commands (`mkdir`, `cp`, `mv`, `git clone`, `touch`) in monitored paths (`~/.claude/`, `~/claude-projects/{claude-research-config,docs,claude-usage}/`, `~/.config/{kitty,tmux}/`), appends the current `session_id` to the sentinel file (deduped). Reminder shown once per session. Commands targeting `docs/*` or `sentinels/*` are excluded
 - **UserPromptSubmit**: Every 30 minutes of active session, reminds to flush memory writes so concurrent sessions in the same directory see updates sooner. Uses sentinel file `~/.claude/hooks/sentinels/last-memory-write`; Claude touches it after writing memory to reset the timer
-- **SubagentStart**: Warns (with explicit block list) when a subagent is spawned with opus, listing tasks that do NOT warrant opus (paper reading, synthesis, writing, code review) vs. the narrow set that do (proof verification, security property checks, finding mathematical errors)
+- **SubagentStart**: Warns (with explicit block list) when a subagent is spawned with opus. Distinguishes judgment/reasoning steps that warrant opus (evaluating constructions, proposing recommendations, identifying flaws/optimizations, reasoning about security properties) from information steps that do not (reading, summarizing, writing, literature search, code generation)
 - **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if the current `session_id` appears in the `docs-edited-this-session` sentinel, blocks stop with `decision:block` — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping. That session's line is removed before blocking; other sessions' entries are untouched. Empty sentinel files are cleaned up automatically. Loop prevention: audit edits only touch `docs/*`, which is excluded from re-setting the sentinel. Only fires when Claude stops naturally (not on Ctrl+C/exit)
 
 These support the Hashimoto workflow pattern: run agents in the background, don't context-switch, check results during natural breaks.
@@ -172,8 +172,8 @@ Agents are invoked automatically by Claude when relevant, or manually via the Ta
 
 ### Cost rationale
 - Haiku (~1/15 Opus cost): mechanical tasks (file scanning, link checking, codebase search)
-- Sonnet (~1/5 Opus cost): default for almost all research work — paper reading, synthesis, document writing, code review, LaTeX editing
-- Opus: narrow correctness-critical tasks only — verifying a specific proof/reduction, checking a specific security property, finding a subtle mathematical error. Not for synthesis, paper reading, or writing.
+- Sonnet (~1/5 Opus cost): information work — paper reading, synthesis, document writing, code review, LaTeX editing, literature search
+- Opus: judgment/reasoning steps — evaluating constructions, proposing recommendations, finding flaws or optimization opportunities, reasoning about security properties. Not for reading, writing, or synthesis. A workflow will typically use Sonnet for most steps and Opus only for the key reasoning steps.
 
 ## Skills / Slash Commands (14 total)
 

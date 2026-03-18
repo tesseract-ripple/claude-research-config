@@ -77,15 +77,15 @@ Use the cheapest model that can handle the task correctly. This applies to **sub
 | Tier | Model | Use for | Examples |
 |------|-------|---------|----------|
 | **1 — Cheap** | Haiku | Simple chat, quick factual Q&A, trivial lookups, memory reads/updates, formatting, boilerplate | "What's the BIP for Pedersen commitments?", grep/glob searches, updating MEMORY.md, generating LaTeX boilerplate |
-| **2 — Standard** | Sonnet | **Default for almost everything**: file editing, routine code, configuration, LaTeX drafting/editing, literature search, **paper reading & summarization**, **synthesis across papers**, **document writing**, codebase exploration, **code review**, standard debugging, research ideation | Writing a Python test harness, reading a paper and extracting results, summarizing related work, editing `.bib` files, refactoring a LaTeX section, reviewing a PR |
-| **3 — Heavy** | Opus | **Narrow correctness-critical tasks only**: (1) verifying a specific proof or reduction for mathematical soundness, (2) determining whether a specific construction satisfies a specific security property (binding, hiding, ZK, simulation), (3) finding a subtle error in a mathematical argument | "Is this reduction tight?", "Does this construction achieve binding under CDH?", "Find the flaw in this proof sketch" |
+| **2 — Standard** | Sonnet | **Information work**: reading & summarizing papers, literature search, synthesis (combining/organizing information), document writing & LaTeX editing, code generation, standard debugging, codebase exploration, code review | Reading a paper and extracting results, summarizing related work, writing up findings, editing `.bib` files, refactoring a section, searching for related constructions |
+| **3 — Heavy** | Opus | **Judgment/reasoning steps**: evaluating a construction for correctness, imprecisions, or optimization opportunities; proposing a recommendation based on mathematical analysis; reasoning about security properties or proof structure; identifying subtle flaws or tradeoffs. The test: *would a wrong answer here be non-obvious and consequential?* | "Is this construction sound?", "What are the weak points in this proof sketch?", "Given these papers, what's the best approach for X?", "Find optimization opportunities in this protocol", "Does this reduction have a tightness problem?" |
 
 **Rules of thumb:**
-- **Sonnet is the default for research work** — paper reading, synthesis, document writing, code review, and most math tasks. Start there.
-- **Opus is for correctness judgments only.** If the task is "tell me about X", "write Y", "find Z", "review W", or "explain Q" — that is Sonnet. If the task is "is this *correct*?" or "does this *hold*?" about a specific cryptographic or mathematical claim, that *may* warrant Opus.
-- Default subagents to **haiku** unless the task requires writing/editing files (→ sonnet) or making a specific correctness determination about a proof/construction (→ opus, only with clear justification).
-- **Never use opus without asking** if the need isn't clearly in the narrow correctness-critical category. If unsure, use sonnet and only escalate if the output is genuinely insufficient.
-- The main conversation model is the user's choice — do not suggest switching unless the task clearly mismatches.
+- **Sonnet for information work; Opus for judgment steps.** A single workflow should use both: Sonnet reads the documents and writes up the results; Opus handles the steps that require mathematical or logical judgment.
+- The key Opus test: is this step producing a *judgment* — an evaluation, recommendation, or analysis that could be non-obviously wrong? If yes, use Opus. If the step is gathering, organizing, or writing information, use Sonnet.
+- Default subagents to **haiku** unless the task requires writing/editing (→ sonnet) or a judgment/reasoning step (→ opus).
+- **Never use opus for a whole-workflow agent** when only part of the workflow needs it. Structure the work so Sonnet handles reading/writing and Opus handles the reasoning steps.
+- If unsure whether a step warrants opus, use sonnet first — escalate only if the reasoning quality is insufficient for the stakes.
 
 ## Tool Usage
 

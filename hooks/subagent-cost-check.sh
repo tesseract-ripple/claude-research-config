@@ -5,21 +5,22 @@ case "$raw" in
   *opus*)
     msg="COST CHECK: This subagent is using opus — STOP and verify this is justified.
 
-Opus is ONLY warranted for:
-  1. Verifying a specific proof or reduction for mathematical soundness
-  2. Determining whether a specific construction satisfies a specific security property
-  3. Finding a subtle error in a mathematical argument
+Opus is warranted for JUDGMENT/REASONING steps:
+  - Evaluating a construction for correctness, imprecisions, or optimization opportunities
+  - Proposing a recommendation based on mathematical or cryptographic analysis
+  - Identifying subtle flaws, tradeoffs, or tightness issues in a proof/reduction
+  - Reasoning about security properties of a specific construction
 
-Opus is NOT warranted for:
+Opus is NOT warranted for INFORMATION steps:
   - Paper reading or summarization → use sonnet
-  - Synthesis across papers → use sonnet
+  - Literature search or synthesis (combining information) → use sonnet
   - Document writing or LaTeX editing → use sonnet
-  - Code review → use sonnet
-  - Literature search → use sonnet or haiku
+  - Code generation or standard code review → use sonnet
   - Any task framed as 'tell me about X', 'write Y', 'find Z', or 'explain Q'
 
-If this subagent does not meet criteria 1-3 above, downgrade to sonnet or haiku.
-Per CLAUDE.md: never use opus without asking the user if the need is not clearly correctness-critical."
+Key test: is this step producing a *judgment* that could be non-obviously wrong?
+If yes → opus may be justified. If it's gathering, organizing, or writing → sonnet.
+Do NOT use opus for a whole-workflow agent when only specific steps need it."
     jq -n --arg msg "$msg" '{systemMessage:$msg}'
     ;;
 esac
