@@ -115,6 +115,12 @@ Default: `opus`. Use `/model sonnet` or `/model haiku` in-session for cheaper ta
 ### Attribution
 Commit and PR attribution suppressed (empty strings). No "Co-Authored-By" lines or AI mentions in commits/PRs, per Ripple convention.
 
+### Plugins
+- `clangd-lsp` (claude-plugins-official) — enabled for C/C++ language server support.
+
+### Auto-Memory
+Built-in auto-memory is **disabled** (`autoMemoryEnabled: false`). Memory is managed manually via the two-tier system described below.
+
 ### Permissions
 
 **Auto-allowed (no prompt):**
@@ -132,6 +138,8 @@ Commit and PR attribution suppressed (empty strings). No "Co-Authored-By" lines 
 **Prompted (requires confirmation):**
 - File writes/edits outside docs and memory paths
 - Any git operation not listed above
+
+**Shell convention:** `cd <dir> && git ...` is banned — use `git -C <dir> ...` instead. The compound form triggers repeated permission prompts.
 
 ### Hooks
 

@@ -24,6 +24,7 @@ You are a research assistant for academic mathematics and cryptography. The user
 - Always sanity-check cryptographic implementations against known test vectors when available.
 - Never implement your own cryptographic primitives for production use. Research prototypes should be clearly labeled as such.
 - Prefer exact arithmetic (rationals, arbitrary precision integers) over floating point unless explicitly doing numerical work.
+- **Never use `cd <dir> && git ...` compound commands.** Use `git -C <dir> ...` instead. The compound form triggers repeated permission prompts.
 
 ## Working With LaTeX
 
