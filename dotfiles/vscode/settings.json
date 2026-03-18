@@ -8,37 +8,40 @@
     "claudeCode.useTerminal": true,
     "gitlens.ai.model": "vscode",
     "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "latex-workshop.latex.env": {
+        "PATH": "/Library/TeX/texbin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    },
     "latex-workshop.latex.tools": [
         {
             "name": "pdflatex",
-            "command": "pdflatex",
+            "command": "/Library/TeX/texbin/pdflatex",
             "args": ["-synctex=1", "-interaction=nonstopmode", "-file-line-error", "%DOC%"]
         },
         {
             "name": "biber",
-            "command": "biber",
+            "command": "/Library/TeX/texbin/biber",
             "args": ["%DOCFILE%"]
         },
         {
             "name": "latexmk",
-            "command": "latexmk",
+            "command": "/Library/TeX/texbin/latexmk",
             "args": ["-pdf", "-synctex=1", "-interaction=nonstopmode", "-file-line-error", "%DOC%"]
         }
     ],
     "latex-workshop.latex.recipes": [
         {
-            "name": "pdflatex × 2 + biber",
-            "tools": ["pdflatex", "biber", "pdflatex", "pdflatex"]
-        },
-        {
             "name": "latexmk",
             "tools": ["latexmk"]
+        },
+        {
+            "name": "pdflatex × 2 + biber",
+            "tools": ["pdflatex", "biber", "pdflatex", "pdflatex"]
         }
     ],
-    "latex-workshop.latex.recipe.default": "pdflatex × 2 + biber",
+    "latex-workshop.latex.recipe.default": "latexmk",
     "latex-workshop.view.pdf.viewer": "tab",
     "latex-workshop.latex.autoBuild.run": "onSave",
-    "latex-workshop.latexindent.path": "latexindent",
+    "latex-workshop.latexindent.path": "/Library/TeX/texbin/latexindent",
     "latex-workshop.latexindent.args": [
         "-c", "%DIR%/",
         "%TMPFILE%",
