@@ -15,7 +15,7 @@ case "$cmd" in
 esac
 
 # Check if any monitored path appears in the command
-monitored="\.claude/|claude-projects/|\.config/kitty|\.config/tmux"
+monitored="\.claude/|claude-projects/(claude-research-config|docs|claude-usage)/|\.config/kitty|\.config/tmux"
 if ! echo "$cmd" | grep -qE "$monitored"; then
   exit 0  # structural command but not in a monitored path
 fi
