@@ -121,6 +121,11 @@
             "type": "command",
             "command": "~/.claude/hooks/memory-periodic-reminder.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/low-token-mode.py",
+            "timeout": 5
           }
         ]
       }

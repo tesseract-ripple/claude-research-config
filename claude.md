@@ -70,6 +70,17 @@ After completing edits to any `.tex` file in a git repo, **always** generate a l
 - For long research tasks, prefer structured output over verbose prose.
 - When running code iteratively, batch related checks rather than running one-at-a-time.
 
+### Low Token Mode
+
+Activated automatically when a session-start hook detects spending is over monthly pace (burn rate > remaining budget / days left). When the ⚠️ LOW BUDGET hook message appears, apply these rules for the session:
+
+- **Subagents**: use haiku for all subagents regardless of task type
+- **latexdiff**: skip unless explicitly requested
+- **Subagent spawning**: work inline where feasible; avoid spawning subagents for tasks that can be done in the main context
+- **Verbosity**: be terse; omit unsolicited elaboration
+- **Memory**: skip updates unless a clear milestone
+- **Opus**: still use for judgment steps if genuinely needed, but note the cost
+
 ### Model Selection (cheapest sufficient model)
 
 Use the cheapest model that can handle the task correctly. This applies to **subagent spawning** (the `model` parameter on Task calls) and as guidance for the user's own `/model` switching.
