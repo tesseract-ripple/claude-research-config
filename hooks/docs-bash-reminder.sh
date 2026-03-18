@@ -26,13 +26,7 @@ case "$cmd" in
 esac
 
 sentinel="$HOME/.claude/hooks/sentinels/docs-edited-this-session"
-audit_done="$HOME/.claude/hooks/sentinels/docs-audit-done"
-
-# Always set the sentinel (gates the Stop audit), UNLESS audit already ran —
-# in that case, still show the reminder but don't re-arm the Stop hook
-if [ ! -f "$audit_done" ]; then
-  touch "$sentinel"
-fi
+touch "$sentinel"
 
 # Show reminder once per session (first qualifying command only)
 reminder_shown="$HOME/.claude/hooks/sentinels/docs-reminder-shown"

@@ -34,9 +34,9 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 │   └── memory-periodic-reminder.sh  # UserPromptSubmit — 30min memory flush
 │   └── sentinels/                   # Session-scoped sentinel files (auto-created/removed)
 │       ├── last-memory-write        # Timestamp for 30-min memory flush timer
-│       ├── docs-edited-this-session # Gates Stop audit (removed after audit)
-│       ├── docs-audit-done          # Prevents re-triggering audit in same session
-│       └── docs-reminder-shown      # Once-per-session docs reminder suppression
+│       ├── docs-edited-this-session # Gates Stop audit (deleted after audit; re-settable)
+│       ├── docs-reminder-shown      # Once-per-session docs reminder suppression
+│       └── latexdiff-stop-checked   # Once-per-session latexdiff block
 ├── agents/                          # Subagent definitions
 │   ├── paper-reader.md              # Sonnet — paper summarization
 │   ├── code-explorer.md             # Haiku — codebase navigation
@@ -133,11 +133,11 @@ All hook logic lives in `~/.claude/hooks/*.sh` scripts (not inline JSON) for mai
 - **SessionStart**: (1) Reminds Claude to read global memory (`~/.claude/memory/MEMORY.md`) and project memory (`<project>/MEMORY.md` if it exists, found by walking up from cwd); (2) runs docs staleness check — compares `~/claude-projects/`, `~/.claude/hooks/`, `agents/`, `skills/`, `scripts/` against what `claude-setup.md` documents, and flags discrepancies (pure filesystem checks, zero LLM cost)
 - **Notification**: macOS notification + sound when Claude needs input
 - **PreToolUse (Edit)**: On first `.tex` file edit per session, reminds to capture `git show HEAD:` baseline for latexdiff. Silent for non-.tex files or if baseline already exists in `/tmp/`
-- **PostToolUse (Write|Edit)**: On first qualifying edit per session, injects docs-trigger-table reminder and sets sentinel for Stop audit. Silent on subsequent edits (once-per-session)
-- **PostToolUse (Bash)**: On first structural command in monitored paths (`~/.claude/`, `~/claude-projects/`, `~/.config/`) per session, reminds about docs updates and sets sentinel. Silent on subsequent commands or unmonitored paths
+- **PostToolUse (Write|Edit)**: On qualifying edits to monitored paths, sets sentinel for Stop audit. Reminder shown once per session; sentinel is set on every qualifying edit (enabling multiple audits per session if config changes after an audit). Edits to `docs/*` are excluded (audit output, not input)
+- **PostToolUse (Bash)**: On structural commands (`mkdir`, `cp`, `mv`, `git clone`, `touch`) in monitored paths (`~/.claude/`, `~/claude-projects/`, `~/.config/`), sets sentinel for Stop audit. Reminder shown once per session. Commands targeting `docs/*` or `sentinels/*` are excluded
 - **UserPromptSubmit**: Every 30 minutes of active session, reminds to flush memory writes so concurrent sessions in the same directory see updates sooner. Uses sentinel file `~/.claude/hooks/sentinels/last-memory-write`; Claude touches it after writing memory to reset the timer
 - **SubagentStart**: Warns when a subagent is spawned with opus model, showing the cost tier rules from CLAUDE.md
-- **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if config/docs were edited this session (tracked by `.docs-edited-this-session` sentinel), blocks stop with `decision:block` — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping. Sentinel is removed before blocking to prevent infinite loops. Only fires when Claude stops naturally (not on Ctrl+C/exit)
+- **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if config/docs were edited this session (tracked by `docs-edited-this-session` sentinel), blocks stop with `decision:block` — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping. Sentinel is deleted before blocking; if new config edits happen after the audit, PostToolUse re-sets it and the next stop audits again. Loop prevention: audit edits only touch `docs/*`, which is excluded from re-setting the sentinel. Only fires when Claude stops naturally (not on Ctrl+C/exit)
 
 These support the Hashimoto workflow pattern: run agents in the background, don't context-switch, check results during natural breaks.
 
