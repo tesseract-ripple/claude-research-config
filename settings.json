@@ -32,6 +32,10 @@
     ]
   },
   "model": "opus[1m]",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "hooks": {
     "SessionStart": [
       {

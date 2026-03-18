@@ -112,6 +112,9 @@ Configured in `~/.claude/.mcp.json`.
 ### Model
 Default: `opus`. Use `/model sonnet` or `/model haiku` in-session for cheaper tasks.
 
+### Attribution
+Commit and PR attribution suppressed (empty strings). No "Co-Authored-By" lines or AI mentions in commits/PRs, per Ripple convention.
+
 ### Permissions
 
 **Auto-allowed (no prompt):**
