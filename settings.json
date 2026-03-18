@@ -1,4 +1,8 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Bash(python3 *)",
@@ -45,11 +49,7 @@
       "Read(*/secrets/*)"
     ]
   },
-  "model": "opus[1m]",
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
+  "model": "sonnet",
   "hooks": {
     "SessionStart": [
       {
