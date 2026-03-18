@@ -32,6 +32,11 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 │   ├── docs-bash-reminder.sh        # PostToolUse (Bash) — structural changes in monitored paths
 │   ├── subagent-cost-check.sh       # SubagentStart — opus cost warning
 │   └── memory-periodic-reminder.sh  # UserPromptSubmit — 30min memory flush
+│   └── sentinels/                   # Session-scoped sentinel files (auto-created/removed)
+│       ├── last-memory-write        # Timestamp for 30-min memory flush timer
+│       ├── docs-edited-this-session # Gates Stop audit (removed after audit)
+│       ├── docs-audit-done          # Prevents re-triggering audit in same session
+│       └── docs-reminder-shown      # Once-per-session docs reminder suppression
 ├── agents/                          # Subagent definitions
 │   ├── paper-reader.md              # Sonnet — paper summarization
 │   ├── code-explorer.md             # Haiku — codebase navigation
@@ -51,7 +56,10 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 │   ├── lit-review/SKILL.md          # /lit-review — structured lit review
 │   ├── review-paper/SKILL.md        # /review-paper — referee-style review
 │   ├── validate-bib/SKILL.md        # /validate-bib — citation validation
-│   └── research-ideation/SKILL.md   # /research-ideation — idea generation
+│   ├── research-ideation/SKILL.md   # /research-ideation — idea generation
+│   ├── git/SKILL.md                 # /git — git best practices
+│   ├── git-worktrees/SKILL.md       # /git-worktrees — isolated worktrees
+│   └── context7/SKILL.md            # /context7 — library docs lookup
 ├── projects/                        # Per-project CLAUDE.md (shadow dirs, auto-created)
 └── scripts/                         # (symlink → claude-research-config/scripts/)
     ├── eod-agents.sh                # End-of-day batch runner
@@ -92,7 +100,12 @@ Logs at `/tmp/claude-config-sync.log` and `/tmp/claude-docs-gdrive-sync.log`.
 
 ## MCP Servers
 
-No MCP servers are currently configured.
+Configured in `~/.claude/.mcp.json`.
+
+| Server | Transport | Purpose |
+|---|---|---|
+| `context7` | stdio (`npx @upstash/context7-mcp`) | Live library/framework documentation lookup. Pairs with `/context7` skill. |
+| `atlassian` | SSE (`https://mcp.atlassian.com/v1/sse`) | Jira and Confluence integration (OAuth, first use prompts auth). |
 
 ## Settings
 
@@ -122,7 +135,7 @@ All hook logic lives in `~/.claude/hooks/*.sh` scripts (not inline JSON) for mai
 - **PreToolUse (Edit)**: On first `.tex` file edit per session, reminds to capture `git show HEAD:` baseline for latexdiff. Silent for non-.tex files or if baseline already exists in `/tmp/`
 - **PostToolUse (Write|Edit)**: On first qualifying edit per session, injects docs-trigger-table reminder and sets sentinel for Stop audit. Silent on subsequent edits (once-per-session)
 - **PostToolUse (Bash)**: On first structural command in monitored paths (`~/.claude/`, `~/claude-projects/`, `~/.config/`) per session, reminds about docs updates and sets sentinel. Silent on subsequent commands or unmonitored paths
-- **UserPromptSubmit**: Every 30 minutes of active session, reminds to flush memory writes so concurrent sessions in the same directory see updates sooner. Uses sentinel file `~/.claude/hooks/.last-memory-write`; Claude touches it after writing memory to reset the timer
+- **UserPromptSubmit**: Every 30 minutes of active session, reminds to flush memory writes so concurrent sessions in the same directory see updates sooner. Uses sentinel file `~/.claude/hooks/sentinels/last-memory-write`; Claude touches it after writing memory to reset the timer
 - **SubagentStart**: Warns when a subagent is spawned with opus model, showing the cost tier rules from CLAUDE.md
 - **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if config/docs were edited this session (tracked by `.docs-edited-this-session` sentinel), blocks stop with `decision:block` — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping. Sentinel is removed before blocking to prevent infinite loops. Only fires when Claude stops naturally (not on Ctrl+C/exit)
 
@@ -147,7 +160,7 @@ Agents are invoked automatically by Claude when relevant, or manually via the Ta
 - Sonnet (~1/5 Opus cost): tasks needing understanding but not deep reasoning
 - Opus: reserved for main session — proofs, complex math, novel research
 
-## Skills / Slash Commands (11 total)
+## Skills / Slash Commands (14 total)
 
 Invoke these with `/command-name` in Claude Code.
 
@@ -172,6 +185,13 @@ Invoke these with `/command-name` in Claude Code.
 |---|---|
 | `/lit-review <topic>` | Structured literature search with BibTeX output |
 | `/review-paper <file>` | Referee-style manuscript review |
+
+### Development
+| Command | Purpose |
+|---|---|
+| `/git` | Git version control essentials and best practices |
+| `/git-worktrees` | Create isolated git worktrees for feature work |
+| `/context7` | Library documentation lookup with tokenization and reranking |
 
 ### Meta
 | Command | Purpose |
@@ -299,3 +319,4 @@ This setup draws from:
 - [Spotify Engineering — Context Engineering for Background Agents](https://engineering.atspotify.com/2025/11/context-engineering-background-coding-agents-part-2) — one change per prompt, focused tasks
 - [Claude Code official docs](https://code.claude.com/docs/en/costs) — cost management, subagents, headless mode
 - [Simon Willison](https://simonwillison.net/tags/claude-code/) — skills over MCP for cost efficiency
+- [ripple/ai/claude-marketplace](https://gitlab.com/ripple/ai/claude-marketplace) (internal) — context7 skill+MCP, git/git-worktrees skills, Atlassian MCP config
