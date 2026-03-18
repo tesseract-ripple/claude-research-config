@@ -76,6 +76,20 @@ Key bindings (emacs mode, active everywhere including Claude Code input):
 
 ---
 
+## LaTeX Terminal Renderers
+
+Packages for rendering LaTeX output directly in the terminal (installed via pip):
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `unicodeitplus` | 0.3.1 | Converts LaTeX to Unicode text approximation |
+| `terminatex` | 1.2.0 | Renders LaTeX as images in terminal via kitty graphics protocol |
+| `term-image` | 0.7.2 | Terminal image display (dependency of terminatex) |
+
+`terminatex` uses `matplotlib` to rasterize LaTeX, then `term-image` to display via kitty's graphics protocol. Requires kitty terminal.
+
+---
+
 ## Claude Code keybindings (`~/.claude/keybindings.json`)
 
 Currently empty (all defaults preserved). Default bindings use:
