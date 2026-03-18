@@ -1,7 +1,9 @@
 #!/bin/bash
 # PostToolUse hook on Bash: remind about docs when commands create/modify
 # files in monitored directories. Silent for all other Bash commands.
-cmd=$(jq -r '.tool_input.command // empty')
+INPUT=$(cat)
+cmd=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+sid=$(echo "$INPUT" | jq -r '.session_id // empty')
 
 # Only trigger on commands that create, copy, move, or clone into monitored paths
 case "$cmd" in
@@ -25,15 +27,17 @@ case "$cmd" in
   */.claude/hooks/sentinels/*) exit 0 ;;
 esac
 
+# Record this session as having edited a monitored file
+[ -z "$sid" ] && exit 0
 sentinel="$HOME/.claude/hooks/sentinels/docs-edited-this-session"
-touch "$sentinel"
+grep -qxF "$sid" "$sentinel" 2>/dev/null || echo "$sid" >> "$sentinel"
 
 # Show reminder once per session (first qualifying command only)
 reminder_shown="$HOME/.claude/hooks/sentinels/docs-reminder-shown"
-if [ -f "$reminder_shown" ]; then
+if grep -qxF "$sid" "$reminder_shown" 2>/dev/null; then
   exit 0
 fi
-touch "$reminder_shown"
+echo "$sid" >> "$reminder_shown"
 
 msg="DOCS CHECK (Bash): You just ran a structural command in a monitored path:
   $cmd

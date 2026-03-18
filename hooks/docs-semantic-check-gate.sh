@@ -1,19 +1,26 @@
 #!/bin/bash
-# Stop hook: if config/docs were edited this session, block the stop and
+# Stop hook: if config/docs were edited THIS session, block the stop and
 # ask Claude to run a semantic audit before finishing.
-# Gated by sentinel — silent if no config/docs were touched.
-# The sentinel is removed on first fire to prevent infinite loops.
+# Uses session_id lines in the sentinel file so concurrent sessions don't interfere.
 INPUT=$(cat)
+sid=$(echo "$INPUT" | jq -r '.session_id // empty')
+[ -z "$sid" ] && exit 0
 
 sentinel="$HOME/.claude/hooks/sentinels/docs-edited-this-session"
 
-if [ ! -f "$sentinel" ]; then
-  exit 0
+if ! grep -qxF "$sid" "$sentinel" 2>/dev/null; then
+  exit 0  # this session didn't edit any monitored files
 fi
 
-# Remove sentinel BEFORE blocking so the audit's own edits
-# (which are excluded from re-setting it) don't cause a loop
-rm -f "$sentinel"
+# Remove this session's entry BEFORE blocking so the audit's own edits
+# (which are excluded from re-setting it) don't cause a loop.
+# Also clean up the reminder-shown sentinel for this session.
+sed -i '' "/^${sid}$/d" "$sentinel" 2>/dev/null
+sed -i '' "/^${sid}$/d" "$HOME/.claude/hooks/sentinels/docs-reminder-shown" 2>/dev/null
+
+# Remove empty sentinel files to avoid clutter
+[ ! -s "$sentinel" ] && rm -f "$sentinel"
+[ ! -s "$HOME/.claude/hooks/sentinels/docs-reminder-shown" ] && rm -f "$HOME/.claude/hooks/sentinels/docs-reminder-shown"
 
 reason="DOCS SEMANTIC AUDIT: Config or docs files were edited this session. Before stopping, read each docs file in ~/claude-projects/docs/ and its corresponding config files, then fix any concrete discrepancies. Check for:
 - Wrong values (numbers, paths, filenames that no longer match reality)
