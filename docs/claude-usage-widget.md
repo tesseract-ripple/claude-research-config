@@ -55,12 +55,12 @@ The refresh token itself is long-lived and tied to your Claude login session. It
 
 **tmux status bar** (example):
 ```
-☁ █████░░░ $140 left | $18.9/$10.7/d | 13d ⚡LTM
-         ^bar   ^remaining  ^burn ^pace       ^LTM flag (if active)
+☁ █████░░░ $138 | $19.0→$10.6/d | 13d ⚡
+          ^bar  ^remaining ^burn  ^pace    ^LTM (if active)
 ```
-- Budget bar and remaining always colored by % used (green/yellow/red)
-- Burn rate is red when burn > pace, green otherwise
-- `⚡LTM` shown (red) when low token mode is active for the session; absent when disabled or not triggered
+- Budget bar and remaining colored by % used (green/yellow/red)
+- Burn rate is red when burn > pace, green otherwise; `→` separates burn from pace
+- `⚡` shown (red) when low token mode is active; absent when disabled or not triggered
 
 **SwiftBar menu bar** (title line):
 ```

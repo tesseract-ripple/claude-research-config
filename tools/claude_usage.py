@@ -480,16 +480,16 @@ def output_tmux(t):
 
     # Burn rate colored red when exceeding pace
     burn_color = "#[fg=red,bold]" if burn > pace else "#[fg=green]"
-    rate_str = f"{burn_color}{fmt(burn)}{reset}/{fmt(pace)}/d"
+    rate_str = f"{burn_color}{fmt(burn)}{reset}→{fmt(pace)}/d"
 
     # LTM indicator
     ltm_str = ""
     sentinel = CLAUDE_DIR / "hooks/sentinels/low-token-warned"
     disabled = CLAUDE_DIR / "hooks/sentinels/low-token-disabled"
     if not disabled.exists() and sentinel.exists() and sentinel.read_text().strip():
-        ltm_str = f" {burn_color}⚡LTM{reset}"
+        ltm_str = f" {burn_color}⚡{reset}"
 
-    print(f"☁ {bar_color}{bar} {remaining} left{reset} | {rate_str} | {days}d{ltm_str}")
+    print(f"☁ {bar_color}{bar} {remaining}{reset} | {rate_str} | {days}d{ltm_str}")
 
 
 def output_swiftbar(t):
