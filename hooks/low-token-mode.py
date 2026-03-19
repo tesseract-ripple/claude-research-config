@@ -10,13 +10,24 @@ from datetime import date
 from pathlib import Path
 
 home = Path.home()
-SENTINEL_F   = home / ".claude/hooks/sentinels/low-token-warned"
-API_CACHE_F  = home / ".claude/usage-api-cache.json"
+SENTINEL_F    = home / ".claude/hooks/sentinels/low-token-warned"
+DISABLED_F    = home / ".claude/hooks/sentinels/low-token-disabled"
+OVERRIDE_F    = home / ".claude/hooks/sentinels/low-token-override-once"
+API_CACHE_F   = home / ".claude/usage-api-cache.json"
 LOCAL_CACHE_F = home / ".claude/usage-cache.json"
-CONFIG_F     = home / ".claude/usage-config.json"
+CONFIG_F      = home / ".claude/usage-config.json"
 
 def main():
     SENTINEL_F.parent.mkdir(parents=True, exist_ok=True)
+
+    # Manually disabled for the full session
+    if DISABLED_F.exists():
+        return
+
+    # Single-command override — consume and skip
+    if OVERRIDE_F.exists():
+        OVERRIDE_F.unlink()
+        return
 
     # Read session_id from hook payload on stdin
     session_id = ""

@@ -5,10 +5,11 @@ Real-time Claude spending tracker displayed in the tmux status bar and macOS men
 ## What It Shows
 
 - **Remaining budget** for the current billing month vs. monthly cap
-- **Burn rate** (average $/day this month)
+- **Burn rate vs. pace** — actual $/day spend alongside the $/day needed to finish on budget; burn turns red when exceeding pace
 - **Depletion projection** — estimated date the budget runs out at current pace
 - **Per-model breakdown** (Opus / Sonnet / Haiku) from local session data
 - **macOS notifications** at 50%, 75%, and 90% of monthly cap (once per threshold per month)
+- **⚡ LTM indicator** — shown in tmux bar and SwiftBar title when low token mode is active this session
 
 ## Files
 
@@ -49,6 +50,25 @@ The access token from the Keychain typically expires after ~1 hour. The script h
 3. If refresh fails, falls back to local JSONL data silently
 
 The refresh token itself is long-lived and tied to your Claude login session. It only becomes invalid if you explicitly log out of Claude Code (`claude logout`) or revoke the OAuth app in Anthropic settings. In that case, running `claude` and logging in again re-writes the Keychain entry.
+
+## Display Format
+
+**tmux status bar** (example):
+```
+☁ █████░░░ $140 left | $18.9/$10.7/d | 13d ⚡LTM
+         ^bar   ^remaining  ^burn ^pace       ^LTM flag (if active)
+```
+- Budget bar and remaining always colored by % used (green/yellow/red)
+- Burn rate is red when burn > pace, green otherwise
+- `⚡LTM` shown (red) when low token mode is active for the session; absent when disabled or not triggered
+
+**SwiftBar menu bar** (title line):
+```
+⚡ ⚠️ ☁ $140 left          ← ⚡ prefix when LTM active; ⚠️ prefix when ≥50% used
+```
+Dropdown shows:
+- `Burn: $X/day` — red when exceeding pace
+- `Pace: $X/day to finish on track`
 
 ## Startup Behaviour
 

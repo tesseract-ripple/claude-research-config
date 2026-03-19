@@ -38,7 +38,9 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 │       ├── docs-edited-this-session # Gates Stop audit (session IDs, one per line)
 │       ├── docs-reminder-shown      # Once-per-session docs reminder (session IDs, one per line)
 │       ├── latexdiff-stop-checked   # Once-per-session latexdiff block
-│       └── low-token-warned         # Once-per-session budget warning (session IDs)
+│       ├── low-token-warned         # Once-per-session budget warning (session IDs)
+│       ├── low-token-disabled       # Manual full-session LTM disable (/ltm session)
+│       └── low-token-override-once  # Skip hook for one prompt (/ltm once, auto-deleted)
 ├── agents/                          # Subagent definitions
 │   ├── paper-reader.md              # Sonnet — paper summarization
 │   ├── code-explorer.md             # Haiku — codebase navigation
@@ -61,7 +63,8 @@ Additional symlinks from `~/.config/` (tmux, kitty, fish, git, latex, swiftbar) 
 │   ├── research-ideation/SKILL.md   # /research-ideation — idea generation
 │   ├── git/SKILL.md                 # /git — git best practices
 │   ├── git-worktrees/SKILL.md       # /git-worktrees — isolated worktrees
-│   └── context7/SKILL.md            # /context7 — library docs lookup
+│   ├── context7/SKILL.md            # /context7 — library docs lookup
+│   └── ltm/SKILL.md                 # /ltm — toggle low token mode (once|session|on|status)
 ├── projects/                        # Per-project CLAUDE.md (shadow dirs, auto-created)
 └── scripts/                         # (symlink → claude-research-config/scripts/)
     ├── eod-agents.sh                # End-of-day batch runner
@@ -152,7 +155,7 @@ All hook logic lives in `~/.claude/hooks/*.sh` scripts (not inline JSON) for mai
 - **PreToolUse (Edit)**: On first `.tex` file edit per session, reminds to capture `git show HEAD:` baseline for latexdiff. Silent for non-.tex files or if baseline already exists in `/tmp/`
 - **PostToolUse (Write|Edit)**: On qualifying edits to monitored paths, appends the current `session_id` to the sentinel file (deduped). Reminder shown once per session. Edits to `docs/*` are excluded (audit output, not input). Session-ID-based sentinels allow concurrent sessions without cross-talk
 - **PostToolUse (Bash)**: On structural commands (`mkdir`, `cp`, `mv`, `git clone`, `touch`) in monitored paths (`~/.claude/`, `~/claude-projects/{claude-research-config,docs,claude-usage}/`, `~/.config/{kitty,tmux}/`), appends the current `session_id` to the sentinel file (deduped). Reminder shown once per session. Commands targeting `docs/*` or `sentinels/*` are excluded
-- **UserPromptSubmit**: (1) Every 30 minutes of active session, reminds to flush memory writes. Uses sentinel `last-memory-write`; Claude touches it after writing to reset the timer. (2) Budget pace check (`low-token-mode.py`): reads existing cache files (no API call), computes burn rate vs remaining/days-left, and if over pace injects a one-line ⚠️ LOW BUDGET system message activating Low Token Mode (defined in CLAUDE.md). Fires at most once per session via `low-token-warned` sentinel. Skips first 2 days of month (noisy) and last day.
+- **UserPromptSubmit**: (1) Every 30 minutes of active session, reminds to flush memory writes. Uses sentinel `last-memory-write`; Claude touches it after writing to reset the timer. (2) Budget pace check (`low-token-mode.py`): reads existing cache files (no API call), computes burn rate vs remaining/days-left, and if over pace injects a one-line ⚠️ LOW BUDGET system message activating Low Token Mode (defined in CLAUDE.md). Fires at most once per session via `low-token-warned` sentinel. Skips first 2 days of month (noisy) and last day. Suppressed entirely if `low-token-disabled` sentinel exists (created by `/ltm session`); suppressed for one prompt if `low-token-override-once` exists (created by `/ltm once`, auto-deleted on use).
 - **SubagentStart**: Warns (with explicit block list) when a subagent is spawned with opus. Distinguishes judgment/reasoning steps that warrant opus (evaluating constructions, proposing recommendations, identifying flaws/optimizations, reasoning about security properties) from information steps that do not (reading, summarizing, writing, literature search, code generation)
 - **Stop**: (1) macOS notification; (2) blocks if `.tex` files have uncommitted changes without diff PDFs; (3) last-chance reminder to update memory files if session was non-trivial; (4) if the current `session_id` appears in the `docs-edited-this-session` sentinel, blocks stop with `decision:block` — Claude reads docs and corresponding configs, compares them, and fixes discrepancies before stopping. That session's line is removed before blocking; other sessions' entries are untouched. Empty sentinel files are cleaned up automatically. Loop prevention: audit edits only touch `docs/*`, which is excluded from re-setting the sentinel. Only fires when Claude stops naturally (not on Ctrl+C/exit)
 

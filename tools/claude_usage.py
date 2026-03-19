@@ -462,22 +462,34 @@ def output_tmux(t):
     remaining = fmt(t["remaining"])
     pct = t["pct_used"]
     days = t["days_left"]
-    daily = fmt(t["daily_avg"])
-
-    # Color coding via tmux format strings
-    if pct >= 90:
-        color = "#[fg=red,bold]"
-    elif pct >= 75:
-        color = "#[fg=yellow]"
-    else:
-        color = "#[fg=green]"
+    burn = t["daily_avg"]
+    pace = t["daily_budget"]
     reset = "#[default]"
+
+    # Budget bar color
+    if pct >= 90:
+        bar_color = "#[fg=red,bold]"
+    elif pct >= 75:
+        bar_color = "#[fg=yellow]"
+    else:
+        bar_color = "#[fg=green]"
 
     bar_len = 8
     filled = min(bar_len, int(pct / 100 * bar_len))
     bar = "█" * filled + "░" * (bar_len - filled)
 
-    print(f"☁ {color}{bar} {remaining} left{reset} | {daily}/d | {days}d left")
+    # Burn rate colored red when exceeding pace
+    burn_color = "#[fg=red,bold]" if burn > pace else "#[fg=green]"
+    rate_str = f"{burn_color}{fmt(burn)}{reset}/{fmt(pace)}/d"
+
+    # LTM indicator
+    ltm_str = ""
+    sentinel = CLAUDE_DIR / "hooks/sentinels/low-token-warned"
+    disabled = CLAUDE_DIR / "hooks/sentinels/low-token-disabled"
+    if not disabled.exists() and sentinel.exists() and sentinel.read_text().strip():
+        ltm_str = f" {burn_color}⚡LTM{reset}"
+
+    print(f"☁ {bar_color}{bar} {remaining} left{reset} | {rate_str} | {days}d{ltm_str}")
 
 
 def output_swiftbar(t):
@@ -490,7 +502,12 @@ def output_swiftbar(t):
     # Menu bar title — remaining budget with color
     sfcolor = {"green": "#22c55e", "yellow": "#eab308", "orange": "#f97316", "red": "#ef4444"}.get(color, "#ffffff")
     alert_prefix = "⚠️ " if t["alert"] else ""
-    print(f"{alert_prefix}☁ {remaining} left | color={sfcolor}")
+    ltm_sentinel = CLAUDE_DIR / "hooks/sentinels/low-token-warned"
+    ltm_disabled = CLAUDE_DIR / "hooks/sentinels/low-token-disabled"
+    ltm_active = (not ltm_disabled.exists() and ltm_sentinel.exists()
+                  and ltm_sentinel.read_text().strip())
+    ltm_prefix = "⚡ " if ltm_active else ""
+    print(f"{ltm_prefix}{alert_prefix}☁ {remaining} left | color={sfcolor}")
     print("---")
 
     # Source indicator
@@ -529,9 +546,11 @@ def output_swiftbar(t):
             print("---")
 
     # Burn rate & projection
-    print(f"Avg: {fmt(t['daily_avg'])}/day")
+    burn_over_pace = t["daily_avg"] > t["daily_budget"]
+    sfburn = "#ef4444" if burn_over_pace else "#22c55e"
+    print(f"Burn: {fmt(t['daily_avg'])}/day | color={sfburn}")
     daily_budget = fmt(t["daily_budget"])
-    print(f"Budget pace: {daily_budget}/day to finish on track")
+    print(f"Pace: {daily_budget}/day to finish on track")
     if t.get("depletion_date") and t["days_until_depleted"] < t["days_left"]:
         print(f"⚠️ At this rate, depletes {t['depletion_date']} | color=red")
     elif t["projected_month"] <= t["cap"]:
